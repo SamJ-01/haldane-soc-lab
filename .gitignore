@@ -1,0 +1,12 @@
+# Compiled templates and local parameter files (may contain your IP)
+*.json.local
+infra/*.json
+*.parameters.local.json
+
+# Secrets: never commit these
+.env
+*.pfx
+*.pem
+
+# macOS
+.DS_Store
