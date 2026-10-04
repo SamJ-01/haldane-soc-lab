@@ -1,6 +1,6 @@
 # Haldane SOC Lab
 
-> **Work in progress.** Phase 0 (foundations) underway.
+> **Work in progress.** Phase 0 complete; Phase 1 (build Haldane Ltd) next.
 
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
@@ -14,7 +14,7 @@ All systems are lab machines I own. No real company or user data is involved.
 
 | Phase | Focus | Status |
 | --- | --- | --- |
-| 0 | Foundations: budget, network from code | In progress |
+| 0 | Foundations: budget, network from code | [Done](docs/00-foundations.md) |
 | 1 | Build Haldane Ltd (AD domain) | Not started |
 | 2 | Visibility (5 log sources into Sentinel) | Not started |
 | 3 | Vulnerability management | Not started |
