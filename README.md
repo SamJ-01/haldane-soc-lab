@@ -1,6 +1,6 @@
 # Haldane SOC Lab
 
-> **Work in progress.** Phase 0 complete; Phase 1 (build Haldane Ltd) next.
+> **Work in progress.** Phases 0 and 1 complete; Phase 2 (visibility) next.
 
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
@@ -15,7 +15,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | Phase | Focus | Status |
 | --- | --- | --- |
 | 0 | Foundations: budget, network from code | [Done](docs/00-foundations.md) |
-| 1 | Build Haldane Ltd (AD domain) | Not started |
+| 1 | Build Haldane Ltd (AD domain) | [Done](docs/01-build.md) |
 | 2 | Visibility (5 log sources into Sentinel) | Not started |
 | 3 | Vulnerability management | Not started |
 | 4 | Detection engineering (rules as code) | Not started |
@@ -30,6 +30,9 @@ All systems are lab machines I own. No real company or user data is involved.
 ```bash
 az login
 ./scripts/deploy-network.sh   # resource group + network, RDP/SSH from your IP only
+./scripts/deploy-servers.sh   # DC01 + WS01 (asks for the admin password)
+./scripts/start-lab.sh        # start all VMs and show their IPs
+./scripts/stop-lab.sh         # deallocate all VMs so billing stops
 ./scripts/teardown.sh         # deletes everything (asks to confirm)
 ```
 
