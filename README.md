@@ -16,7 +16,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | --- | --- | --- |
 | 0 | Foundations: budget, network from code | [Done](docs/00-foundations.md) |
 | 1 | Build Haldane Ltd (AD domain) | [Done](docs/01-build.md) |
-| 2 | Visibility (5 log sources into Sentinel) | Not started |
+| 2 | Visibility (5 log sources into Sentinel) | In progress |
 | 3 | Vulnerability management | Not started |
 | 4 | Detection engineering (rules as code) | Not started |
 | 5 | Response automation | Not started |
@@ -31,6 +31,7 @@ All systems are lab machines I own. No real company or user data is involved.
 az login
 ./scripts/deploy-network.sh   # resource group + network, RDP/SSH from your IP only
 ./scripts/deploy-servers.sh   # DC01 + WS01 (asks for the admin password)
+./scripts/deploy-monitoring.sh  # Log Analytics workspace + Microsoft Sentinel
 ./scripts/start-lab.sh        # start all VMs and show their IPs
 ./scripts/stop-lab.sh         # deallocate all VMs so billing stops
 ./scripts/teardown.sh         # deletes everything (asks to confirm)
