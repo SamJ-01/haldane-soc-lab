@@ -16,7 +16,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | --- | --- | --- |
 | 0 | Foundations: budget, network from code | [Done](docs/00-foundations.md) |
 | 1 | Build Haldane Ltd (AD domain) | [Done](docs/01-build.md) |
-| 2 | Visibility (5 log sources into Sentinel) | In progress |
+| 2 | Visibility (5 log sources into Sentinel) | [In progress](docs/02-visibility.md) |
 | 3 | Vulnerability management | Not started |
 | 4 | Detection engineering (rules as code) | Not started |
 | 5 | Response automation | Not started |
