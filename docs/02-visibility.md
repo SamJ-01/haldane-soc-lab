@@ -1,7 +1,8 @@
 # Phase 2: Visibility
 
-> **In progress.** Done so far: the SIEM, Defender for Servers and
-> Just-in-Time access. Next: Sysmon and connecting the log sources.
+> **In progress.** Done so far: the SIEM, Defender for Servers, Just-in-Time
+> access, Sysmon, and four log sources proven in Sentinel. Next: Defender for
+> Endpoint telemetry and Entra ID sign-in logs.
 
 ## What was built
 
@@ -10,6 +11,9 @@
 | Log Analytics workspace `law-haldane` | Stores every log; searched with KQL. 1 GB/day cap, 30-day retention. | [`infra/monitoring.bicep`](../infra/monitoring.bicep) |
 | Microsoft Sentinel | SIEM on top of the workspace: analytics rules, incidents, workbooks, automation | [`infra/monitoring.bicep`](../infra/monitoring.bicep) |
 | Defender for Servers Plan 2 | Installs Microsoft Defender for Endpoint (EDR) on both VMs; enables Just-in-Time access | `az security pricing create` (30-day trial) |
+| Sysmon (SwiftOnSecurity config) | Detailed process, file, registry and DNS activity on both VMs | [`scripts/install-sysmon.sh`](../scripts/install-sysmon.sh) (Azure Run Command, no RDP) |
+| Azure Monitor Agent + data collection rule | Sends Security and Sysmon logs to the workspace | [`infra/data-collection.bicep`](../infra/data-collection.bicep) |
+| Activity log diagnostic setting | Sends the subscription's Azure Activity log to the workspace | [`infra/activity-log.bicep`](../infra/activity-log.bicep) |
 | Just-in-Time (JIT) VM access | RDP is closed by default and opened for up to 3 hours on request | [`infra/jit.bicep`](../infra/jit.bicep), [`scripts/request-access.sh`](../scripts/request-access.sh) |
 
 WS01 was also moved from the default `Computers` container into
@@ -50,6 +54,14 @@ processes worth watching, which keeps the volume down.
 
 ![Sysmon query in Sentinel showing event counts by computer and Sysmon event ID](../images/phase2-query-sysmon.png)
 
+**4. AzureActivity:** management actions in the subscription, including the
+deployment of the data collection rule (`DATACOLLECTIONRULES/WRITE`). Most
+rows are Azure Policy audit checks (`POLICIES/AUDIT...`) triggered by each
+change: routine background activity that a real SOC would filter out. (Caller
+column blurred.)
+
+![AzureActivity query in Sentinel showing today's management operations](../images/phase2-query-azureactivity.png)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
@@ -63,6 +75,6 @@ processes worth watching, which keeps the volume down.
 ## Still to do
 
 - Confirm both VMs appear in Defender for Endpoint (security.microsoft.com, Assets, Devices).
-- Install Sysmon on DC01 and WS01.
-- Connect the log sources to Sentinel and prove each one arrives with a KQL query.
+- Connect Microsoft Defender XDR to Sentinel (the `Device...` tables).
+- Connect Entra ID sign-in logs.
 - Decide before day 30 of the trial whether to keep Defender for Servers.
