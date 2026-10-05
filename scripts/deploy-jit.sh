@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Phase 2: set up Just-in-Time RDP access for DC01 and WS01.
-# Needs Defender for Servers Plan 2 switched on first.
+# Needs Defender for Servers Plan 2 switched on first. If it fails with
+# PolicyNotFound straight after enabling the plan, wait 10-15 minutes for
+# the JIT feature to become available, then run it again.
 #   ./scripts/deploy-jit.sh
 set -euo pipefail
 

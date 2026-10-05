@@ -6,7 +6,6 @@
 set -euo pipefail
 
 RESOURCE_GROUP="rg-haldane-lab"
-LOCATION="uksouth"
 HOURS=3
 
 if [[ $# -eq 0 ]]; then
@@ -20,7 +19,16 @@ MY_IP="$(curl -s https://api.ipify.org)"
 END_TIME="$(date -u -v+${HOURS}H +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
   || date -u -d "+${HOURS} hours" +%Y-%m-%dT%H:%M:%SZ)"
 SUB_ID="$(az account show --query id --output tsv)"
-POLICY="/subscriptions/${SUB_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Security/locations/${LOCATION}/jitNetworkAccessPolicies/jit-haldane"
+
+# Find the lab's JIT policy, whatever it's called (jit-haldane if created by
+# deploy-jit.sh, "default" if JIT was enabled in the portal).
+POLICY="$(az rest --method get \
+  --url "https://management.azure.com/subscriptions/${SUB_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Security/jitNetworkAccessPolicies?api-version=2020-01-01" \
+  --query "value[0].id" --output tsv)"
+if [[ -z "$POLICY" ]]; then
+  echo "No JIT policy found in ${RESOURCE_GROUP}. Run ./scripts/deploy-jit.sh first." >&2
+  exit 1
+fi
 
 # The request lists each VM, the port to open, who may connect and until when.
 ENTRIES=""
