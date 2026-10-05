@@ -37,6 +37,12 @@ in Sentinel's Logs page.
 
 ![Heartbeat query in Sentinel showing DC01.haldane.local and WS01.haldane.local](../images/phase2-query-heartbeat.png)
 
+**2. SecurityEvent:** Windows Security logs from both machines, including
+successful logons (4624), privileged logons (4672), logoffs (4634) and new
+processes (4688).
+
+![SecurityEvent query in Sentinel showing event counts by computer and event ID](../images/phase2-query-securityevent.png)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
