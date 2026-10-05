@@ -10,5 +10,5 @@ for vm in DC01 WS01; do
     --resource-group rg-haldane-lab --name "$vm" \
     --command-id RunPowerShellScript \
     --scripts @scripts/windows/06-install-sysmon.ps1 \
-    --query "value[0].message" --output tsv
+    --query "value[].message" --output tsv   # output, then any errors
 done
