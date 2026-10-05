@@ -23,6 +23,11 @@ WS01 was also moved from the default `Computers` container into
 | How access is granted | Permanent NSG rule | `request-access.sh` adds a temporary NSG rule for up to 3 hours |
 | Evidence | | NSG shows only `MicrosoftDefenderForCloud-JITRule-*` rules while a request is active; Azure's default `DenyAllInBound` blocks everything else |
 
+Deploying JIT, closing the permanent rule and requesting access, then
+listing the corp NSG's rules: only the two temporary JIT rules remain.
+
+![Terminal: JIT deployed, permanent RDP rule removed, NSG shows only the temporary JIT rules](../images/phase2-jit-nsg-rules.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
