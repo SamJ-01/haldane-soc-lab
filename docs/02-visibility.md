@@ -28,6 +28,15 @@ listing the corp NSG's rules: only the two temporary JIT rules remain.
 
 ![Terminal: JIT deployed, permanent RDP rule removed, NSG shows only the temporary JIT rules](../images/phase2-jit-nsg-rules.webp)
 
+## Proving each log source arrives
+
+Each source is checked with a query from [`queries/data-health.kql`](../queries/data-health.kql)
+in Sentinel's Logs page.
+
+**1. Heartbeat:** the Azure Monitor Agent on both VMs is alive and reporting.
+
+![Heartbeat query in Sentinel showing DC01.haldane.local and WS01.haldane.local](../images/phase2-query-heartbeat.png)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
@@ -35,6 +44,7 @@ listing the corp NSG's rules: only the two temporary JIT rules remain.
 | Sentinel onboarding failed with `MissingSubscriptionRegistration` | New subscriptions don't have most Azure services ("resource providers") registered | `deploy-monitoring.sh` now registers the five providers Sentinel needs before deploying |
 | Creating the JIT policy failed with `PolicyNotFound` | Run seconds after enabling Defender for Servers, before the JIT feature was available | Waited about 15 minutes and re-ran; `request-access.sh` now finds the policy by lookup rather than by name |
 | RDP kept disconnecting, and reconnecting failed | On a mobile connection the public IP changed three times in one session (92.40.216.17, then .214.35, then .214.34), so a single-IP rule was always out of date | Allowed the provider's /20 block instead (`ADMIN_CIDR`), a deliberate trade-off between security and usability |
+| Sysmon installed without a configuration ("Failed to open xml configuration") | The sysmon-modular config URL returned 404: the upstream project had moved its files, and the download failure wasn't reported | Switched to SwiftOnSecurity's sysmon-config and made the script stop on the first error |
 | Mac commands typed into the VM's PowerShell | Two terminals open at once | Check the prompt: `%` is the Mac, `PS C:\>` is Windows |
 
 ## Still to do
