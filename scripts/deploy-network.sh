@@ -17,8 +17,12 @@ RESOURCE_GROUP="rg-haldane-lab"
 LOCATION="uksouth"
 
 # Your home IP, so only you can connect. Re-run this script if it changes.
+# On a mobile connection your IP can change every few minutes within your
+# provider's address block; allow the block instead, e.g.:
+#   ADMIN_CIDR=92.40.208.0/20 ./scripts/deploy-network.sh
 MY_IP="$(curl -s https://api.ipify.org)"
-echo "Allowing remote admin from ${MY_IP} only"
+ADMIN_CIDR="${ADMIN_CIDR:-${MY_IP}/32}"
+echo "Allowing remote admin from ${ADMIN_CIDR} only"
 
 # DNS servers for the network. If DNS_SERVER is given, use it. Otherwise
 # keep whatever the network already uses, so re-running this script (e.g.
@@ -37,7 +41,7 @@ az group create --name "$RESOURCE_GROUP" --location "$LOCATION" --output none
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \
   --template-file infra/network.bicep \
-  --parameters adminSourceIp="${MY_IP}/32" \
+  --parameters adminSourceIp="${ADMIN_CIDR}" \
   --parameters dnsServers="$DNS_JSON" \
   --parameters allowPermanentRdp="${PERMANENT_RDP:-false}" \
   --output table

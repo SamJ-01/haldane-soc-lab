@@ -15,6 +15,9 @@ else
 fi
 
 MY_IP="$(curl -s https://api.ipify.org)"
+# On a mobile connection your IP can change mid-session; set ADMIN_CIDR to
+# your provider's address block (e.g. 92.40.208.0/20) to allow all of it.
+SOURCE="${ADMIN_CIDR:-$MY_IP}"
 # End time in UTC. macOS and Linux spell the date command differently.
 END_TIME="$(date -u -v+${HOURS}H +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
   || date -u -d "+${HOURS} hours" +%Y-%m-%dT%H:%M:%SZ)"
@@ -34,7 +37,7 @@ fi
 ENTRIES=""
 for vm in "${VMS[@]}"; do
   VM_ID="/subscriptions/${SUB_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Compute/virtualMachines/${vm}"
-  ENTRIES+="{\"id\":\"${VM_ID}\",\"ports\":[{\"number\":3389,\"allowedSourceAddressPrefix\":\"${MY_IP}\",\"endTimeUtc\":\"${END_TIME}\"}]},"
+  ENTRIES+="{\"id\":\"${VM_ID}\",\"ports\":[{\"number\":3389,\"allowedSourceAddressPrefix\":\"${SOURCE}\",\"endTimeUtc\":\"${END_TIME}\"}]},"
 done
 BODY="{\"virtualMachines\":[${ENTRIES%,}],\"justification\":\"Lab admin session\"}"
 
@@ -42,4 +45,4 @@ az rest --method post \
   --url "https://management.azure.com${POLICY}/initiate?api-version=2020-01-01" \
   --body "$BODY" --output none
 
-echo "RDP open to ${VMS[*]} from ${MY_IP} until ${END_TIME} (UTC)."
+echo "RDP open to ${VMS[*]} from ${SOURCE} until ${END_TIME} (UTC)."
