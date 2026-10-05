@@ -43,6 +43,13 @@ processes (4688).
 
 ![SecurityEvent query in Sentinel showing event counts by computer and event ID](../images/phase2-query-securityevent.png)
 
+**3. Sysmon:** detailed activity from both machines: processes created (1),
+files created (11), registry values set (13) and DNS queries (22). Network
+connections (3) are rare because the configuration only records them for
+processes worth watching, which keeps the volume down.
+
+![Sysmon query in Sentinel showing event counts by computer and Sysmon event ID](../images/phase2-query-sysmon.png)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
