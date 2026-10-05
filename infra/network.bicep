@@ -4,8 +4,10 @@
 //   corp     (10.10.1.0/24) - the domain controller and workstation (Phase 1)
 //   attacker (10.10.2.0/24) - the Kali VM used for scans and simulations
 //
-// Nothing here is reachable from the internet except remote admin (RDP to
-// corp, SSH to attacker), and only from the single IP address you pass in.
+// Nothing here is reachable from the internet except remote admin, and only
+// from your own IP. RDP to corp is normally handled by Just-in-Time access
+// (infra/jit.bicep), which opens it on request; a permanent RDP rule is only
+// added if allowPermanentRdp is true.
 
 @description('Azure region for every resource. Defaults to the resource group\'s region.')
 param location string = resourceGroup().location
@@ -16,31 +18,38 @@ param adminSourceIp string
 @description('DNS servers for the network. Leave empty until the domain controller exists (Phase 1).')
 param dnsServers array = []
 
+@description('Keep a permanent RDP rule for your IP. Leave false once Just-in-Time access is set up.')
+param allowPermanentRdp bool = false
+
 var corpPrefix = '10.10.1.0/24'
 var attackerPrefix = '10.10.2.0/24'
 
-// Network security group for the corp subnet: RDP from your IP only.
-// Azure's default rules already allow traffic inside the virtual network
-// and deny everything else from the internet.
+// Network security group for the corp subnet. Azure's default rules already
+// allow traffic inside the virtual network and deny everything else from the
+// internet; Just-in-Time access adds a temporary RDP rule when requested.
+// Note: re-deploying this template clears any open JIT window, so request
+// access again afterwards.
+var permanentRdpRule = [
+  {
+    name: 'Allow-RDP-from-admin'
+    properties: {
+      priority: 100
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: 'Tcp'
+      sourceAddressPrefix: adminSourceIp
+      sourcePortRange: '*'
+      destinationAddressPrefix: corpPrefix
+      destinationPortRange: '3389'
+    }
+  }
+]
+
 resource corpNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: 'nsg-haldane-corp'
   location: location
   properties: {
-    securityRules: [
-      {
-        name: 'Allow-RDP-from-admin'
-        properties: {
-          priority: 100
-          direction: 'Inbound'
-          access: 'Allow'
-          protocol: 'Tcp'
-          sourceAddressPrefix: adminSourceIp
-          sourcePortRange: '*'
-          destinationAddressPrefix: corpPrefix
-          destinationPortRange: '3389'
-        }
-      }
-    ]
+    securityRules: allowPermanentRdp ? permanentRdpRule : []
   }
 }
 

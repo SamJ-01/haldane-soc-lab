@@ -6,6 +6,11 @@
 # After DC01 becomes a domain controller (Phase 1), point the network's DNS
 # at it so other machines can find the domain:
 #   DNS_SERVER=10.10.1.4 ./scripts/deploy-network.sh
+#
+# RDP is normally opened on request with Just-in-Time access
+# (./scripts/request-access.sh). To keep a permanent RDP rule for your IP
+# instead (e.g. before JIT is set up):
+#   PERMANENT_RDP=true ./scripts/deploy-network.sh
 set -euo pipefail
 
 RESOURCE_GROUP="rg-haldane-lab"
@@ -34,4 +39,5 @@ az deployment group create \
   --template-file infra/network.bicep \
   --parameters adminSourceIp="${MY_IP}/32" \
   --parameters dnsServers="$DNS_JSON" \
+  --parameters allowPermanentRdp="${PERMANENT_RDP:-false}" \
   --output table

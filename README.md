@@ -32,7 +32,9 @@ az login
 ./scripts/deploy-network.sh   # resource group + network, RDP/SSH from your IP only
 ./scripts/deploy-servers.sh   # DC01 + WS01 (asks for the admin password)
 ./scripts/deploy-monitoring.sh  # Log Analytics workspace + Microsoft Sentinel
+./scripts/deploy-jit.sh       # Just-in-Time RDP (needs Defender for Servers P2)
 ./scripts/start-lab.sh        # start all VMs and show their IPs
+./scripts/request-access.sh   # open RDP for your current IP for 3 hours
 ./scripts/stop-lab.sh         # deallocate all VMs so billing stops
 ./scripts/teardown.sh         # deletes everything (asks to confirm)
 ```
