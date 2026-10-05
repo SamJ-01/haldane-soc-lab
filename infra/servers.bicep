@@ -86,6 +86,10 @@ resource nics 'Microsoft.Network/networkInterfaces@2023-11-01' = [for (server, i
 resource vms 'Microsoft.Compute/virtualMachines@2024-03-01' = [for (server, i) in servers: {
   name: server.name
   location: location
+  // A managed identity lets the Azure Monitor Agent (Phase 2) sign in to Azure.
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     hardwareProfile: {
       vmSize: vmSize

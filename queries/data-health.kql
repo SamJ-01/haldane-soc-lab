@@ -1,0 +1,33 @@
+// Data health checks for the Haldane lab.
+// Run each query separately in Sentinel > Logs (or Log Analytics > Logs).
+// Every one should return rows from the last hour once its source is connected.
+
+// 1. Is each VM's agent alive? (one row per VM, LastSeen within a few minutes)
+Heartbeat
+| summarize LastSeen = max(TimeGenerated) by Computer
+| order by Computer asc
+
+// 2. Windows Security events: what's arriving from each machine?
+SecurityEvent
+| where TimeGenerated > ago(1h)
+| summarize Events = count() by Computer, EventID, Activity
+| order by Events desc
+
+// 3. Sysmon: process creation (1), network connections (3), DNS queries (22)...
+Event
+| where TimeGenerated > ago(1h)
+| where Source == "Microsoft-Windows-Sysmon"
+| summarize Events = count() by Computer, EventID
+| order by Computer asc, EventID asc
+
+// 4. Azure Activity: management actions in the subscription
+AzureActivity
+| where TimeGenerated > ago(1d)
+| project TimeGenerated, Caller, OperationNameValue, ActivityStatusValue, ResourceGroup
+| order by TimeGenerated desc
+
+// 5. All sources at a glance: events per table per hour
+union withsource = Table Heartbeat, SecurityEvent, Event, AzureActivity
+| where TimeGenerated > ago(24h)
+| summarize Events = count() by Table, bin(TimeGenerated, 1h)
+| order by TimeGenerated desc
