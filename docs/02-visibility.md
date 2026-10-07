@@ -62,6 +62,13 @@ column blurred.)
 
 ![AzureActivity query in Sentinel showing today's management operations](../images/phase2-query-azureactivity.png)
 
+**5. Defender for Endpoint:** both VMs onboarded to MDE automatically by
+Defender for Servers Plan 2, with no agent installed by hand. Each shows its
+domain (`haldane.local`), OS and an exposure level from Defender's own
+vulnerability assessment.
+
+![Defender device inventory showing dc01.haldane.local and ws01.haldane.local onboarded](../images/phase2-mde-devices.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
@@ -74,7 +81,6 @@ column blurred.)
 
 ## Still to do
 
-- Confirm both VMs appear in Defender for Endpoint (security.microsoft.com, Assets, Devices).
 - Connect Microsoft Defender XDR to Sentinel (the `Device...` tables).
 - Connect Entra ID sign-in logs.
 - Decide before day 30 of the trial whether to keep Defender for Servers.
