@@ -69,6 +69,15 @@ vulnerability assessment.
 
 ![Defender device inventory showing dc01.haldane.local and ws01.haldane.local onboarded](../images/phase2-mde-devices.webp)
 
+**6. Defender XDR connector:** streams Defender's incidents and alerts, plus
+five Defender for Endpoint tables, into Sentinel. Only the tables the KQL
+detections use were chosen (DeviceInfo, DeviceProcessEvents,
+DeviceNetworkEvents, DeviceRegistryEvents, DeviceLogonEvents). The other five,
+including the high-volume DeviceFileEvents and DeviceImageLoadEvents, were left
+off to stay under the 1 GB/day cap. (Browser bar cropped out.)
+
+![Defender XDR connector in Sentinel: Connected, 5 of 10 Defender for Endpoint tables selected](../images/phase2-xdr-connector.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
@@ -82,6 +91,6 @@ vulnerability assessment.
 
 ## Still to do
 
-- Connect Microsoft Defender XDR to Sentinel (the `Device...` tables).
+- Prove Defender for Endpoint data is arriving in Sentinel (`DeviceProcessEvents` query).
 - Connect Entra ID sign-in logs.
 - Decide before day 30 of the trial whether to keep Defender for Servers.
