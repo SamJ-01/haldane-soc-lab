@@ -78,6 +78,7 @@ vulnerability assessment.
 | RDP kept disconnecting, and reconnecting failed | On a mobile connection the public IP changed three times in one session (92.40.216.17, then .214.35, then .214.34), so a single-IP rule was always out of date | Allowed the provider's /20 block instead (`ADMIN_CIDR`), a deliberate trade-off between security and usability |
 | Sysmon installed without a configuration ("Failed to open xml configuration") | The sysmon-modular config URL returned 404: the upstream project had moved its files, and the download failure wasn't reported | Switched to SwiftOnSecurity's sysmon-config and made the script stop on the first error |
 | Mac commands typed into the VM's PowerShell | Two terminals open at once | Check the prompt: `%` is the Mac, `PS C:\>` is Windows |
+| Defender portal kept asking to sign in again (`AADSTS50058`) and the sign-in window opened blank | Safari's cross-site tracking protection blocks the background sign-in Microsoft's portals rely on | Used Chrome for the Microsoft portals |
 
 ## Still to do
 
