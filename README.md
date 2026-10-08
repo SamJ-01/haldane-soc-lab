@@ -37,6 +37,7 @@ az login
 ./scripts/deploy-data-collection.sh  # Windows + Sysmon + Activity logs into Sentinel
 ./scripts/start-lab.sh        # start all VMs and show their IPs
 ./scripts/request-access.sh   # open RDP for your current IP for 3 hours
+./scripts/connect.sh ws01       # open Remote Desktop to WS01 (or dc01; add a username to sign in as staff)
 ./scripts/stop-lab.sh         # deallocate all VMs so billing stops
 ./scripts/teardown.sh         # deletes everything (asks to confirm)
 ```
