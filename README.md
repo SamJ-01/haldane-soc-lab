@@ -1,6 +1,6 @@
 # Haldane SOC Lab
 
-> **Work in progress.** Phases 0–2 complete; Phase 3 (vulnerability management) next.
+> **Work in progress.** Phases 0–2 complete; Phase 3 (vulnerability management) in progress.
 
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
@@ -17,7 +17,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | 0 | Foundations: budget, network from code | [Done](docs/00-foundations.md) |
 | 1 | Build Haldane Ltd (AD domain) | [Done](docs/01-build.md) |
 | 2 | Visibility (5 log sources into Sentinel) | [Done](docs/02-visibility.md) |
-| 3 | Vulnerability management | Not started |
+| 3 | Vulnerability management | [In progress](docs/03-vulnerability-management.md) |
 | 4 | Detection engineering (rules as code) | Not started |
 | 5 | Response automation | Not started |
 | 6 | Purple-team exercise | Not started |
@@ -36,6 +36,7 @@ az login
 ./scripts/deploy-jit.sh       # Just-in-Time RDP + SSH (needs Defender for Servers P2)
 ./scripts/install-sysmon.sh   # Sysmon on both VMs, via Azure Run Command
 ./scripts/deploy-data-collection.sh  # Windows + Sysmon + Activity logs into Sentinel
+./scripts/install-nessus.sh   # Nessus on Kali, over SSH
 ./scripts/start-lab.sh        # start all VMs and show their IPs
 ./scripts/request-access.sh   # open RDP for your current IP for 3 hours (add KALI01 for SSH)
 ./scripts/connect.sh ws01     # open Remote Desktop to WS01 (or dc01; add a username to sign in as staff)
