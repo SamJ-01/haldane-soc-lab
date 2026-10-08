@@ -37,6 +37,7 @@ az login
 ./scripts/install-sysmon.sh   # Sysmon on both VMs, via Azure Run Command
 ./scripts/deploy-data-collection.sh  # Windows + Sysmon + Activity logs into Sentinel
 ./scripts/install-nessus.sh   # Nessus on Kali, over SSH
+./scripts/allow-scanner.sh    # Group Policy: scan ports open to Kali (10.10.2.4) only
 ./scripts/start-lab.sh        # start all VMs and show their IPs
 ./scripts/request-access.sh   # open RDP for your current IP for 3 hours (add KALI01 for SSH)
 ./scripts/connect.sh ws01     # open Remote Desktop to WS01 (or dc01; add a username to sign in as staff)
