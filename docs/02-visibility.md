@@ -1,8 +1,9 @@
 # Phase 2: Visibility
 
-> **In progress.** Done so far: the SIEM, Defender for Servers, Just-in-Time
-> access, Sysmon, and four log sources proven in Sentinel. Next: Defender for
-> Endpoint telemetry and Entra ID sign-in logs.
+> **Done.** The SIEM, Defender for Servers (with Defender for Endpoint on both
+> VMs), Just-in-Time access, Sysmon, and five log sources proven in Sentinel:
+> Heartbeat, Windows Security events, Sysmon, Azure Activity and Defender for
+> Endpoint.
 
 ## What was built
 
@@ -78,6 +79,14 @@ off to stay under the 1 GB/day cap. (Browser bar cropped out.)
 
 ![Defender XDR connector in Sentinel: Connected, 5 of 10 Defender for Endpoint tables selected](../images/phase2-xdr-connector.webp)
 
+**7. DeviceProcessEvents:** Defender for Endpoint process telemetry from both
+VMs, queried in the Sentinel workspace itself (not Defender's Advanced hunting,
+which would show the data even without the connector). This proves the
+connector delivers EDR data into the SIEM, where the detection rules in later
+phases will run.
+
+![DeviceProcessEvents query in Sentinel Logs showing event counts for dc01 and ws01](../images/phase2-query-deviceprocessevents.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
@@ -89,8 +98,16 @@ off to stay under the 1 GB/day cap. (Browser bar cropped out.)
 | Mac commands typed into the VM's PowerShell | Two terminals open at once | Check the prompt: `%` is the Mac, `PS C:\>` is Windows |
 | Defender portal kept asking to sign in again (`AADSTS50058`) and the sign-in window opened blank | Safari's cross-site tracking protection blocks the background sign-in Microsoft's portals rely on | Used Chrome for the Microsoft portals |
 
-## Still to do
+## Decisions
 
-- Prove Defender for Endpoint data is arriving in Sentinel (`DeviceProcessEvents` query).
-- Connect Entra ID sign-in logs.
-- Decide before day 30 of the trial whether to keep Defender for Servers.
+- **Entra ID sign-in logs: skipped on purpose.** Haldane's users live in the
+  on-premises Active Directory (`haldane.local`), not in Entra ID, so Entra
+  sign-in logs would only show the lab owner signing in to Azure. Their logons
+  are already captured by Windows Security events (4624, 4625, 4672) and
+  `DeviceLogonEvents`. Collecting Entra sign-in logs would also need an Entra
+  ID P1/P2 licence.
+- **Defender for Endpoint tables: 5 of 10.** Only the tables the detections
+  use, to stay within the 1 GB/day cap (see evidence 6).
+- **Defender for Servers trial:** the 30-day trial ends around 4 November
+  2026. The purple-team exercise (Phase 6) relies on Defender for Endpoint, so
+  it must run before then; the plan can then be switched off to avoid charges.

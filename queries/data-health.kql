@@ -26,8 +26,13 @@ AzureActivity
 | project TimeGenerated, Caller, OperationNameValue, ActivityStatusValue, ResourceGroup
 | order by TimeGenerated desc
 
-// 5. All sources at a glance: events per table per hour
-union withsource = Table Heartbeat, SecurityEvent, Event, AzureActivity
+// 5. Defender for Endpoint (via the Defender XDR connector): process events
+DeviceProcessEvents
+| where TimeGenerated > ago(24h)
+| summarize Events = count() by DeviceName
+
+// 6. All sources at a glance: events per table per hour
+union withsource = Table Heartbeat, SecurityEvent, Event, AzureActivity, DeviceProcessEvents
 | where TimeGenerated > ago(24h)
 | summarize Events = count() by Table, bin(TimeGenerated, 1h)
 | order by TimeGenerated desc
