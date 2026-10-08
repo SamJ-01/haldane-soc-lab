@@ -17,8 +17,9 @@ if [[ ! -f "$KEY" ]]; then
 fi
 
 echo "Finding the newest Kali image..."
+# Skip the arm64 images: the lab's VM size (B2s_v2) is an Intel/AMD (x64) size.
 URN="$(az vm image list --publisher kali-linux --offer kali --all \
-  --query "sort_by([], &version)[-1].urn" --output tsv)"
+  --query "sort_by([?!contains(sku, 'arm64')], &version)[-1].urn" --output tsv)"
 if [[ -z "$URN" ]]; then
   echo "No Kali image found in the Marketplace." >&2
   exit 1
