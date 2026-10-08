@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Just-in-Time access: open RDP to the lab VMs for your CURRENT IP, for 3 hours.
-# After that, Azure closes it again by itself.
-#   ./scripts/request-access.sh          # DC01 and WS01
-#   ./scripts/request-access.sh WS01     # just one VM
+# Just-in-Time access: open remote access to the lab VMs for your CURRENT IP,
+# for 3 hours (RDP for the Windows servers, SSH for Kali). After that, Azure
+# closes it again by itself.
+#   ./scripts/request-access.sh                    # DC01 and WS01
+#   ./scripts/request-access.sh WS01               # just one VM
+#   ./scripts/request-access.sh DC01 WS01 KALI01   # all three
 set -euo pipefail
 
 RESOURCE_GROUP="rg-haldane-lab"
@@ -36,8 +38,10 @@ fi
 # The request lists each VM, the port to open, who may connect and until when.
 ENTRIES=""
 for vm in "${VMS[@]}"; do
+  vm="$(echo "$vm" | tr '[:lower:]' '[:upper:]')"
+  if [[ "$vm" == KALI* ]]; then PORT=22; else PORT=3389; fi
   VM_ID="/subscriptions/${SUB_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Compute/virtualMachines/${vm}"
-  ENTRIES+="{\"id\":\"${VM_ID}\",\"ports\":[{\"number\":3389,\"allowedSourceAddressPrefix\":\"${SOURCE}\",\"endTimeUtc\":\"${END_TIME}\"}]},"
+  ENTRIES+="{\"id\":\"${VM_ID}\",\"ports\":[{\"number\":${PORT},\"allowedSourceAddressPrefix\":\"${SOURCE}\",\"endTimeUtc\":\"${END_TIME}\"}]},"
 done
 BODY="{\"virtualMachines\":[${ENTRIES%,}],\"justification\":\"Lab admin session\"}"
 
@@ -45,4 +49,4 @@ az rest --method post \
   --url "https://management.azure.com${POLICY}/initiate?api-version=2020-01-01" \
   --body "$BODY" --output none
 
-echo "RDP open to ${VMS[*]} from ${SOURCE} until ${END_TIME} (UTC)."
+echo "Access open to ${VMS[*]} from ${SOURCE} until ${END_TIME} (UTC)."

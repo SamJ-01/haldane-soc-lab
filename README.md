@@ -32,12 +32,14 @@ az login
 ./scripts/deploy-network.sh   # resource group + network, RDP/SSH from your IP only
 ./scripts/deploy-servers.sh   # DC01 + WS01 (asks for the admin password)
 ./scripts/deploy-monitoring.sh  # Log Analytics workspace + Microsoft Sentinel
-./scripts/deploy-jit.sh       # Just-in-Time RDP (needs Defender for Servers P2)
+./scripts/deploy-attacker.sh  # Kali VM in the attacker subnet (SSH key only)
+./scripts/deploy-jit.sh       # Just-in-Time RDP + SSH (needs Defender for Servers P2)
 ./scripts/install-sysmon.sh   # Sysmon on both VMs, via Azure Run Command
 ./scripts/deploy-data-collection.sh  # Windows + Sysmon + Activity logs into Sentinel
 ./scripts/start-lab.sh        # start all VMs and show their IPs
-./scripts/request-access.sh   # open RDP for your current IP for 3 hours
-./scripts/connect.sh ws01       # open Remote Desktop to WS01 (or dc01; add a username to sign in as staff)
+./scripts/request-access.sh   # open RDP for your current IP for 3 hours (add KALI01 for SSH)
+./scripts/connect.sh ws01     # open Remote Desktop to WS01 (or dc01; add a username to sign in as staff)
+./scripts/connect.sh kali01   # SSH to Kali, with Nessus at https://localhost:8834
 ./scripts/stop-lab.sh         # deallocate all VMs so billing stops
 ./scripts/teardown.sh         # deletes everything (asks to confirm)
 ```

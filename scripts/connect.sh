@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Open a Remote Desktop session to a lab VM (macOS, Windows App).
+# Connect to a lab VM from your Mac.
 #
-#   ./scripts/connect.sh ws01              # signs in as HALDANE\haldaneadmin
+#   ./scripts/connect.sh ws01              # Remote Desktop as HALDANE\haldaneadmin
 #   ./scripts/connect.sh dc01
-#   ./scripts/connect.sh ws01 a.patel      # signs in as HALDANE\a.patel
+#   ./scripts/connect.sh ws01 a.patel      # Remote Desktop as HALDANE\a.patel
+#   ./scripts/connect.sh kali01            # SSH to Kali, with Nessus tunnelled to
+#                                          # https://localhost:8834 on your Mac
 #
-# Request access first with request-access.sh: RDP is closed otherwise.
-# The password is typed into Windows App, never stored here.
+# Request access first with request-access.sh: RDP and SSH are closed otherwise.
+# Windows passwords are typed into Windows App, never stored here.
 set -euo pipefail
 
 RESOURCE_GROUP="rg-haldane-lab"
-VM="$(echo "${1:?Usage: $0 dc01|ws01 [username]}" | tr '[:lower:]' '[:upper:]')"
+VM="$(echo "${1:?Usage: $0 dc01|ws01|kali01 [username]}" | tr '[:lower:]' '[:upper:]')"
 USER_ARG="${2:-haldaneadmin}"
 # zsh doesn't treat "#" as a comment when commands are pasted, so a pasted
 # "# comment" would arrive here as the username. Ignore it.
@@ -22,6 +24,11 @@ IP=$(az vm list-ip-addresses --resource-group "$RESOURCE_GROUP" --name "$VM" \
 if [ -z "$IP" ]; then
   echo "No public IP for $VM. Is it running? Try ./scripts/start-lab.sh" >&2
   exit 1
+fi
+
+if [[ "$VM" == KALI* ]]; then
+  echo "SSH to $VM ($IP). Nessus: https://localhost:8834 while this is open. Type exit to leave."
+  exec ssh -i "$HOME/.ssh/haldane_kali" -L 8834:localhost:8834 "haldaneadmin@${IP}"
 fi
 
 RDP_FILE="${TMPDIR:-/tmp}/haldane-${VM}.rdp"

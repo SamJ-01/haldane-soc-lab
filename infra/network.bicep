@@ -5,9 +5,9 @@
 //   attacker (10.10.2.0/24) - the Kali VM used for scans and simulations
 //
 // Nothing here is reachable from the internet except remote admin, and only
-// from your own IP. RDP to corp is normally handled by Just-in-Time access
-// (infra/jit.bicep), which opens it on request; a permanent RDP rule is only
-// added if allowPermanentRdp is true.
+// from your own IP. RDP to corp and SSH to Kali are normally handled by
+// Just-in-Time access (infra/jit.bicep), which opens them on request; permanent
+// rules are only added if allowPermanentRdp / allowPermanentSsh are true.
 
 @description('Azure region for every resource. Defaults to the resource group\'s region.')
 param location string = resourceGroup().location
@@ -20,6 +20,9 @@ param dnsServers array = []
 
 @description('Keep a permanent RDP rule for your IP. Leave false once Just-in-Time access is set up.')
 param allowPermanentRdp bool = false
+
+@description('Keep a permanent SSH rule to the attacker subnet. Leave false once Kali has Just-in-Time access.')
+param allowPermanentSsh bool = false
 
 var corpPrefix = '10.10.1.0/24'
 var attackerPrefix = '10.10.2.0/24'
@@ -53,26 +56,29 @@ resource corpNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   }
 }
 
-// Network security group for the attacker subnet: SSH from your IP only.
+// Network security group for the attacker subnet. Like corp, SSH to Kali is
+// opened on request by Just-in-Time access, unless allowPermanentSsh is true.
+var permanentSshRule = [
+  {
+    name: 'Allow-SSH-from-admin'
+    properties: {
+      priority: 100
+      direction: 'Inbound'
+      access: 'Allow'
+      protocol: 'Tcp'
+      sourceAddressPrefix: adminSourceIp
+      sourcePortRange: '*'
+      destinationAddressPrefix: attackerPrefix
+      destinationPortRange: '22'
+    }
+  }
+]
+
 resource attackerNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: 'nsg-haldane-attacker'
   location: location
   properties: {
-    securityRules: [
-      {
-        name: 'Allow-SSH-from-admin'
-        properties: {
-          priority: 100
-          direction: 'Inbound'
-          access: 'Allow'
-          protocol: 'Tcp'
-          sourceAddressPrefix: adminSourceIp
-          sourcePortRange: '*'
-          destinationAddressPrefix: attackerPrefix
-          destinationPortRange: '22'
-        }
-      }
-    ]
+    securityRules: allowPermanentSsh ? permanentSshRule : []
   }
 }
 

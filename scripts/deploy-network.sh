@@ -7,10 +7,11 @@
 # at it so other machines can find the domain:
 #   DNS_SERVER=10.10.1.4 ./scripts/deploy-network.sh
 #
-# RDP is normally opened on request with Just-in-Time access
-# (./scripts/request-access.sh). To keep a permanent RDP rule for your IP
+# RDP and SSH are normally opened on request with Just-in-Time access
+# (./scripts/request-access.sh). To keep a permanent rule for your IP
 # instead (e.g. before JIT is set up):
-#   PERMANENT_RDP=true ./scripts/deploy-network.sh
+#   PERMANENT_RDP=true ./scripts/deploy-network.sh    # RDP to corp
+#   PERMANENT_SSH=true ./scripts/deploy-network.sh    # SSH to Kali
 set -euo pipefail
 
 RESOURCE_GROUP="rg-haldane-lab"
@@ -44,4 +45,5 @@ az deployment group create \
   --parameters adminSourceIp="${ADMIN_CIDR}" \
   --parameters dnsServers="$DNS_JSON" \
   --parameters allowPermanentRdp="${PERMANENT_RDP:-false}" \
+  --parameters allowPermanentSsh="${PERMANENT_SSH:-false}" \
   --output table
