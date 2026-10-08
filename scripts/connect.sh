@@ -11,7 +11,11 @@ set -euo pipefail
 
 RESOURCE_GROUP="rg-haldane-lab"
 VM="$(echo "${1:?Usage: $0 dc01|ws01 [username]}" | tr '[:lower:]' '[:upper:]')"
-USERNAME="HALDANE\\${2:-haldaneadmin}"
+USER_ARG="${2:-haldaneadmin}"
+# zsh doesn't treat "#" as a comment when commands are pasted, so a pasted
+# "# comment" would arrive here as the username. Ignore it.
+case "$USER_ARG" in "#"*) USER_ARG="haldaneadmin" ;; esac
+USERNAME="HALDANE\\${USER_ARG}"
 
 IP=$(az vm list-ip-addresses --resource-group "$RESOURCE_GROUP" --name "$VM" \
   --query "[0].virtualMachine.network.publicIpAddresses[0].ipAddress" --output tsv)
