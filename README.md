@@ -39,6 +39,8 @@ az login
 ./scripts/install-nessus.sh   # Nessus on Kali, over SSH
 ./scripts/allow-scanner.sh    # Group Policy: scan ports open to Kali (10.10.2.4) only
 ./scripts/check-scan-ports.sh # from Kali, test which ports on DC01/WS01 it can reach
+./scripts/scan-account.sh enable  # svc-nessus on for a credentialed scan (disable after)
+./scripts/apply-fixes.sh      # Group Policy fixing the top Nessus findings
 ./scripts/start-lab.sh        # start all VMs and show their IPs
 ./scripts/request-access.sh   # open RDP for your current IP for 3 hours (add KALI01 for SSH)
 ./scripts/connect.sh ws01     # open Remote Desktop to WS01 (or dc01; add a username to sign in as staff)
