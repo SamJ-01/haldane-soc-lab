@@ -27,6 +27,24 @@ All systems are lab machines I own. No real company or user data is involved.
 
 ## Build and tear down
 
+### Everyday use
+
+One script covers a normal session ([`scripts/lab.sh`](scripts/lab.sh)). It
+works out your current IP (allowing the whole mobile block when you're on mobile
+data), opens Just-in-Time access, and connects:
+
+```bash
+./scripts/lab.sh up dc01        # start the lab, open access, Remote Desktop to DC01
+./scripts/lab.sh connect ws01   # another window, to WS01 (or kali01)
+./scripts/lab.sh access         # your IP changed? re-open access
+./scripts/lab.sh scan           # scan account on + Kali with Nessus at https://localhost:8834
+./scripts/lab.sh fix            # apply and verify the Phase 3 fixes
+./scripts/lab.sh status         # VM states and your IP
+./scripts/lab.sh down           # scan account off, every VM deallocated
+```
+
+### Every script
+
 ```bash
 az login
 ./scripts/deploy-network.sh   # resource group + network, RDP/SSH from your IP only
