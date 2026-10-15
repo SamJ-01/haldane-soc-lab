@@ -1,0 +1,23 @@
+// HAL-001: Privileged account network logon from outside the corporate subnet
+//
+// Why: in Phase 3 a scanner signed in as a Domain Admin 3,196 times from the
+// attacker subnet and nothing alerted. An attacker with a stolen admin
+// password would look exactly the same.
+// MITRE ATT&CK: T1078.002 Valid Accounts: Domain Accounts;
+//               T1021.002 Remote Services: SMB/Windows Admin Shares
+// Data: SecurityEvent 4624 (successful logon) from DC01 and WS01
+// Severity: High
+// Known benign: svc-nessus during an approved scan window (see the write-up).
+
+let PrivilegedAccounts = dynamic(["svc-nessus", "d.evans", "haldaneadmin"]);
+let CorpSubnet = "10.10.1.0/24";
+SecurityEvent
+| where TimeGenerated > ago(7d)
+| where EventID == 4624                          // successful logon
+| where LogonType == 3                           // over the network
+| where TargetUserName in~ (PrivilegedAccounts)  // a privileged account
+| where isnotempty(IpAddress) and IpAddress != "-"
+| where not(ipv4_is_in_range(IpAddress, CorpSubnet))  // from outside corp
+| summarize Logons = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
+    by TargetUserName, IpAddress, Computer
+| order by Logons desc
