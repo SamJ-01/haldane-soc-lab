@@ -15,13 +15,14 @@
 
 let PrivilegedAccounts = dynamic(["svc-nessus", "d.evans", "haldaneadmin"]);
 let CorpSubnet = "10.10.1.0/24";
-// Columns are read from WatchlistItem, which always exists, so the rule
-// still validates before the watchlist's rows have been indexed.
+// column_ifexists() keeps the rule valid even if the watchlist is missing or
+// not yet indexed. It then simply matches nothing, so every logon alerts:
+// the rule fails safe (noisy) rather than silent.
 let ScanWindows = _GetWatchlist('ApprovedScanWindows')
-    | project Account  = tolower(tostring(WatchlistItem.Account)),
-              SourceIP = tostring(WatchlistItem.SourceIP),
-              StartUtc = todatetime(WatchlistItem.StartUtc),
-              EndUtc   = todatetime(WatchlistItem.EndUtc);
+    | project Account  = tolower(tostring(column_ifexists("Account", ""))),
+              SourceIP = tostring(column_ifexists("SourceIP", "")),
+              StartUtc = todatetime(column_ifexists("StartUtc", "")),
+              EndUtc   = todatetime(column_ifexists("EndUtc", ""));
 let Logons = SecurityEvent
     | where TimeGenerated > ago(7d)
     | where EventID == 4624                          // successful logon
