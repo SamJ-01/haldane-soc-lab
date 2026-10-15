@@ -26,4 +26,11 @@ T1021.002 Remote Services: SMB/Windows Admin Shares.
 | `svc-nessus` from 10.10.2.4 (KALI01), ~1,600 logons on each server | **True positive, expected:** the approved Phase 3 re-scan. The rule would have caught the activity Defender missed. |
 | `haldaneadmin` from a public IP, 2 logons on DC01 | **True positive, benign:** the lab admin's own Remote Desktop session through Just-in-Time access. A Domain Admin logging in from the internet is worth an alert in a real company; here it is expected and explained. |
 
+**Deployed as code:** [`infra/detections.bicep`](../infra/detections.bicep) loads the
+`.kql` file into a scheduled analytics rule ([`deploy-detections.sh`](../scripts/deploy-detections.sh)):
+hourly, High severity, account/IP/host entity mapping, incidents grouped when
+the same entities repeat within 5 hours.
+
+![HAL-001 enabled in the Defender portal's detection rules](../images/phase4-hal001-rule.webp)
+
 *Query written with AI assistance; tested and reviewed against lab data.*
