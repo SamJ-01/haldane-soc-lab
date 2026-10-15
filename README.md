@@ -54,6 +54,7 @@ az login
 ./scripts/deploy-jit.sh       # Just-in-Time RDP + SSH (needs Defender for Servers P2)
 ./scripts/install-sysmon.sh   # Sysmon on both VMs, via Azure Run Command
 ./scripts/deploy-data-collection.sh  # Windows + Sysmon + Activity logs into Sentinel
+./scripts/deploy-detections.sh # Sentinel analytics rules from detections/*.kql
 ./scripts/install-nessus.sh   # Nessus on Kali, over SSH
 ./scripts/allow-scanner.sh    # Group Policy: scan ports open to Kali (10.10.2.4) only
 ./scripts/check-scan-ports.sh # from Kali, test which ports on DC01/WS01 it can reach
