@@ -15,9 +15,13 @@
 
 let PrivilegedAccounts = dynamic(["svc-nessus", "d.evans", "haldaneadmin"]);
 let CorpSubnet = "10.10.1.0/24";
+// Columns are read from WatchlistItem, which always exists, so the rule
+// still validates before the watchlist's rows have been indexed.
 let ScanWindows = _GetWatchlist('ApprovedScanWindows')
-    | project Account = tolower(tostring(Account)), SourceIP = tostring(SourceIP),
-              StartUtc = todatetime(StartUtc), EndUtc = todatetime(EndUtc);
+    | project Account  = tolower(tostring(WatchlistItem.Account)),
+              SourceIP = tostring(WatchlistItem.SourceIP),
+              StartUtc = todatetime(WatchlistItem.StartUtc),
+              EndUtc   = todatetime(WatchlistItem.EndUtc);
 let Logons = SecurityEvent
     | where TimeGenerated > ago(7d)
     | where EventID == 4624                          // successful logon
