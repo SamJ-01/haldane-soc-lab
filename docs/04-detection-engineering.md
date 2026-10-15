@@ -33,4 +33,19 @@ the same entities repeat within 5 hours.
 
 ![HAL-001 enabled in the Defender portal's detection rules](../images/phase4-hal001-rule.webp)
 
+**Tested live:** within its first two runs the rule raised three High
+incidents, each with the account, host and source IP mapped as entities:
+
+| Incident | Entities | Cause |
+| --- | --- | --- |
+| 1 and 2 | `svc-nessus` on WS01 and DC01 | The Phase 3 re-scan, caught on the rule's first run |
+| 3 | `haldaneadmin` on DC01, from a public IP | The lab admin's Remote Desktop session, the deliberate test |
+
+![Three HAL-001 incidents in the Defender portal](../images/phase4-hal001-incidents.webp)
+![HAL-001 incident graph: haldaneadmin, DC01 and the source IP (redacted)](../images/phase4-hal001-incident.webp)
+
+The incidents did not show at first: the Defender portal's incident list
+filters on "Priority score: 15-100" by default, and new single-alert
+incidents from custom rules can score lower. Removing the filter showed them.
+
 *Query written with AI assistance; tested and reviewed against lab data.*
