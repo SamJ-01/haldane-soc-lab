@@ -18,7 +18,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | 1 | Build Haldane Ltd (AD domain) | [Done](docs/01-build.md) |
 | 2 | Visibility (5 log sources into Sentinel) | [Done](docs/02-visibility.md) |
 | 3 | Vulnerability management | [Done](docs/03-vulnerability-management.md) |
-| 4 | Detection engineering (rules as code) | Not started |
+| 4 | Detection engineering (rules as code) | [In progress](docs/04-detection-engineering.md) |
 | 5 | Response automation | Not started |
 | 6 | Purple-team exercise | Not started |
 | 7 | Coverage and tuning | Not started |
