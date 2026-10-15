@@ -48,6 +48,22 @@ The incidents did not show at first: the Defender portal's incident list
 filters on "Priority score: 15-100" by default, and new single-alert
 incidents from custom rules can score lower. Removing the filter showed them.
 
+### Tuning: approved scan windows
+
+The scanner caused two of the three incidents. Simply excluding `svc-nessus`
+would blind the rule to anyone who steals that Domain Admin account. Instead,
+logons are ignored only when the **account, source IP and time** all match an
+authorised scan in the `ApprovedScanWindows` watchlist
+([`approved-scan-windows.csv`](../detections/watchlists/approved-scan-windows.csv)),
+deployed with the rule. The same account used outside a window, or from
+another address, still raises a High incident. If the watchlist is ever
+missing, the rule fails safe: everything alerts.
+
+After tuning, the same 7 days of data return only the admin's own logon; both
+scanner rows are gone:
+
+![HAL-001 after tuning: only the haldaneadmin row remains (IP redacted)](../images/phase4-hal001-tuned.webp)
+
 **Triage:** all three incidents were investigated and resolved as
 *Informational, expected activity: Security testing* (shown in the portal as
 "Benign Positive"), each with a comment recording why: the two scanner
