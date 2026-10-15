@@ -48,4 +48,12 @@ The incidents did not show at first: the Defender portal's incident list
 filters on "Priority score: 15-100" by default, and new single-alert
 incidents from custom rules can score lower. Removing the filter showed them.
 
+**Triage:** all three incidents were investigated and resolved as
+*Informational, expected activity: Security testing* (shown in the portal as
+"Benign Positive"), each with a comment recording why: the two scanner
+incidents matched the approved re-scan window, and the admin logon was the
+deliberate test through Just-in-Time access.
+
+![Incident 2 resolved as Informational, expected activity: Security testing, with the reason recorded](../images/phase4-incident-closed.webp)
+
 *Query written with AI assistance; tested and reviewed against lab data.*
