@@ -1,6 +1,6 @@
 # Haldane SOC Lab
 
-> **Work in progress.** Phases 0–2 complete; Phase 3 (vulnerability management) in progress.
+> **Work in progress.** Phases 0–3 complete; Phase 4 (detection engineering) next.
 
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
@@ -17,7 +17,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | 0 | Foundations: budget, network from code | [Done](docs/00-foundations.md) |
 | 1 | Build Haldane Ltd (AD domain) | [Done](docs/01-build.md) |
 | 2 | Visibility (5 log sources into Sentinel) | [Done](docs/02-visibility.md) |
-| 3 | Vulnerability management | [In progress](docs/03-vulnerability-management.md) |
+| 3 | Vulnerability management | [Done](docs/03-vulnerability-management.md) |
 | 4 | Detection engineering (rules as code) | Not started |
 | 5 | Response automation | Not started |
 | 6 | Purple-team exercise | Not started |
