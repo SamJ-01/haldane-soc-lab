@@ -7,17 +7,31 @@
 //               T1021.002 Remote Services: SMB/Windows Admin Shares
 // Data: SecurityEvent 4624 (successful logon) from DC01 and WS01
 // Severity: High
-// Known benign: svc-nessus during an approved scan window (see the write-up).
+//
+// Tuning: logons are ignored ONLY when the account, source IP AND time all
+// match an approved scan window in the ApprovedScanWindows watchlist
+// (detections/watchlists/approved-scan-windows.csv). The same scanner account
+// outside its window, or from any other address, still alerts.
 
 let PrivilegedAccounts = dynamic(["svc-nessus", "d.evans", "haldaneadmin"]);
 let CorpSubnet = "10.10.1.0/24";
-SecurityEvent
-| where TimeGenerated > ago(7d)
-| where EventID == 4624                          // successful logon
-| where LogonType == 3                           // over the network
-| where TargetUserName in~ (PrivilegedAccounts)  // a privileged account
-| where isnotempty(IpAddress) and IpAddress != "-"
-| where not(ipv4_is_in_range(IpAddress, CorpSubnet))  // from outside corp
+let ScanWindows = _GetWatchlist('ApprovedScanWindows')
+    | project Account = tolower(tostring(Account)), SourceIP = tostring(SourceIP),
+              StartUtc = todatetime(StartUtc), EndUtc = todatetime(EndUtc);
+let Logons = SecurityEvent
+    | where TimeGenerated > ago(7d)
+    | where EventID == 4624                          // successful logon
+    | where LogonType == 3                           // over the network
+    | where TargetUserName in~ (PrivilegedAccounts)  // a privileged account
+    | where isnotempty(IpAddress) and IpAddress != "-"
+    | where not(ipv4_is_in_range(IpAddress, CorpSubnet))  // from outside corp
+    | extend Account = tolower(TargetUserName);
+let ApprovedScanLogons = Logons
+    | join kind=inner ScanWindows on Account, $left.IpAddress == $right.SourceIP
+    | where TimeGenerated between (StartUtc .. EndUtc)
+    | project _ItemId;
+Logons
+| where _ItemId !in (ApprovedScanLogons)
 | summarize Logons = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
     by TargetUserName, IpAddress, Computer
 | order by Logons desc

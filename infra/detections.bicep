@@ -8,8 +8,28 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existin
   name: 'law-haldane'
 }
 
+// Approved vulnerability-scan windows, used by HAL-001 to ignore the scanner
+// only while a scan is authorised.
+resource scanWindows 'Microsoft.SecurityInsights/watchlists@2024-03-01' = {
+  scope: workspace
+  name: 'ApprovedScanWindows'
+  properties: {
+    displayName: 'Approved scan windows'
+    description: 'Authorised credentialed vulnerability scans: account, source IP and time window.'
+    provider: 'Haldane SOC'
+    source: 'approved-scan-windows.csv'
+    itemsSearchKey: 'ScanId'
+    contentType: 'text/csv'
+    numberOfLinesToSkip: 0
+    rawContent: loadTextContent('../detections/watchlists/approved-scan-windows.csv')
+  }
+}
+
 resource hal001 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
   scope: workspace
+  dependsOn: [
+    scanWindows
+  ]
   name: guid(workspace.id, 'HAL-001')
   kind: 'Scheduled'
   properties: {
