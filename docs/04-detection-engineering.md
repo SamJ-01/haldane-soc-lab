@@ -74,6 +74,13 @@ deliberate test through Just-in-Time access.
 
 *Query written with AI assistance; tested and reviewed against lab data.*
 
+**Still alerting by design:** each time I RDP to DC01 from home through JIT,
+HAL-001 raises an incident for `haldaneadmin` from my home IP (incident 4 on
+16 Oct, resolved as security testing). I have chosen not to suppress this: an
+admin logon to a domain controller from the internet is exactly what the rule
+is for. In a real organisation, admins would connect through Azure Bastion or
+a VPN from the corporate range, so this alert would not fire.
+
 ## HAL-002: Member added to a privileged Active Directory group
 
 **Query:** [`detections/HAL-002-member-added-to-privileged-group.kql`](../detections/HAL-002-member-added-to-privileged-group.kql)
