@@ -1,0 +1,28 @@
+// HAL-002: Member added to a privileged Active Directory group
+//
+// Why: adding an account they control to Domain Admins (or similar) is a
+// common way for an attacker to keep full control of a domain. In a small
+// organisation these groups almost never change, so every addition is worth
+// a look.
+// MITRE ATT&CK: T1098 Account Manipulation;
+//               T1078.002 Valid Accounts: Domain Accounts
+// Data: SecurityEvent from the domain controller (DC01)
+//   4728 = member added to a security-enabled global group (e.g. Domain Admins)
+//   4732 = member added to a security-enabled local group (e.g. Administrators)
+//   4756 = member added to a security-enabled universal group (e.g. Enterprise Admins)
+// Note: in these events TargetUserName is the GROUP, MemberName is the account
+// that was added, and SubjectUserName is who made the change.
+// Severity: High
+
+let PrivilegedGroups = dynamic(["Domain Admins", "Administrators", "Enterprise Admins", "Schema Admins"]);
+SecurityEvent
+| where TimeGenerated > ago(1d)
+| where EventID in (4728, 4732, 4756)
+| where TargetUserName in~ (PrivilegedGroups)
+| project TimeGenerated, Computer, EventID,
+          Group = TargetUserName,
+          Member = MemberName,
+          MemberSid,
+          AddedBy = SubjectUserName,
+          AddedByDomain = SubjectDomainName
+| order by TimeGenerated desc

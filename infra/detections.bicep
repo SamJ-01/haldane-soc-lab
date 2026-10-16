@@ -95,3 +95,77 @@ resource hal001 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
     }
   }
 }
+
+resource hal002 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
+  scope: workspace
+  name: guid(workspace.id, 'HAL-002')
+  kind: 'Scheduled'
+  properties: {
+    displayName: 'HAL-002 Member added to a privileged Active Directory group'
+    description: 'An account was added to Domain Admins, Administrators, Enterprise Admins or Schema Admins. These groups give full control of the domain and should change only through an approved change.'
+    severity: 'High'
+    enabled: true
+    query: loadTextContent('../detections/HAL-002-member-added-to-privileged-group.kql')
+    queryFrequency: 'PT1H'
+    queryPeriod: 'PT1H'
+    triggerOperator: 'GreaterThan'
+    triggerThreshold: 0
+    suppressionEnabled: false
+    suppressionDuration: 'PT1H'
+    tactics: [
+      'Persistence'
+      'PrivilegeEscalation'
+    ]
+    techniques: [
+      'T1098'
+      'T1078'
+    ]
+    eventGroupingSettings: {
+      aggregationKind: 'AlertPerResult'
+    }
+    entityMappings: [
+      {
+        // The account that was added to the group
+        entityType: 'Account'
+        fieldMappings: [
+          {
+            identifier: 'Sid'
+            columnName: 'MemberSid'
+          }
+        ]
+      }
+      {
+        // The account that made the change
+        entityType: 'Account'
+        fieldMappings: [
+          {
+            identifier: 'Name'
+            columnName: 'AddedBy'
+          }
+          {
+            identifier: 'NTDomain'
+            columnName: 'AddedByDomain'
+          }
+        ]
+      }
+      {
+        entityType: 'Host'
+        fieldMappings: [
+          {
+            identifier: 'FullName'
+            columnName: 'Computer'
+          }
+        ]
+      }
+    ]
+    incidentConfiguration: {
+      createIncident: true
+      groupingConfiguration: {
+        enabled: true
+        reopenClosedIncident: false
+        lookbackDuration: 'PT5H'
+        matchingMethod: 'AllEntities'
+      }
+    }
+  }
+}

@@ -74,6 +74,37 @@ deliberate test through Just-in-Time access.
 
 *Query written with AI assistance; tested and reviewed against lab data.*
 
+## HAL-002: Member added to a privileged Active Directory group
+
+**Query:** [`detections/HAL-002-member-added-to-privileged-group.kql`](../detections/HAL-002-member-added-to-privileged-group.kql)
+(the KQL was written with AI assistance; I ran the test and verified the results).
+
+**Why:** an attacker who gets admin rights once will often add an account they
+control to Domain Admins so they can come back. In a small organisation these
+groups almost never change, so every addition deserves a look.
+
+| | |
+|---|---|
+| **MITRE ATT&CK** | T1098 Account Manipulation; T1078.002 Valid Accounts: Domain Accounts |
+| **Data** | `SecurityEvent` from DC01: 4728 (global group), 4732 (local group), 4756 (universal group) |
+| **Groups watched** | Domain Admins, Administrators, Enterprise Admins, Schema Admins |
+| **Severity** | High |
+| **Runs** | Every hour, over the last hour; one incident per change |
+
+A trap worth knowing: in these events `TargetUserName` is the **group**, not a
+person. The account that was added is `MemberName` (`MemberSid`) and the
+person who made the change is `SubjectUserName`.
+
+**Test:** on DC01 I created a disabled test account, `hal002.test`, added it to
+Domain Admins in Active Directory Users and Computers, then removed it.
+
+![Test account added to Domain Admins](../images/phase4-hal002-group-add.webp)
+
+The query found exactly that change: event 4728, Domain Admins,
+`CN=HAL002 Test`, added by `haldaneadmin`.
+
+![HAL-002 query result: the test addition to Domain Admins](../images/phase4-hal002-results.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
