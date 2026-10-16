@@ -110,6 +110,12 @@ incident 5 in Microsoft Defender:
 
 ![HAL-002 incident in the Defender incident queue](../images/phase4-hal002-incidents.webp)
 
+The incident linked DC01 and both accounts (the one added and the one who
+added it). It was resolved as *Informational, expected activity – Security
+testing*, and the test account was then deleted.
+
+![HAL-002 incident being resolved as security testing](../images/phase4-hal002-incident.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
