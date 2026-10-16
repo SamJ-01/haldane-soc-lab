@@ -105,6 +105,11 @@ The query found exactly that change: event 4728, Domain Admins,
 
 ![HAL-002 query result: the test addition to Domain Admins](../images/phase4-hal002-results.webp)
 
+After deploying the rule, its first run picked up the same test and raised
+incident 5 in Microsoft Defender:
+
+![HAL-002 incident in the Defender incident queue](../images/phase4-hal002-incidents.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
