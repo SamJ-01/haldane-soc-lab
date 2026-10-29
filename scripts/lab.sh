@@ -5,7 +5,7 @@
 #   ./scripts/lab.sh up dc01         ...then open Remote Desktop to DC01 (or ws01, kali01)
 #   ./scripts/lab.sh access          re-open access (e.g. after your IP changes)
 #   ./scripts/lab.sh connect ws01    connect to a VM (kali01 also tunnels Nessus)
-#   ./scripts/lab.sh scan            enable the scan account and connect to Kali for Nessus
+#   ./scripts/lab.sh scan            start the VMs, enable the scan account, connect to Kali for Nessus
 #   ./scripts/lab.sh fix             apply the Phase 3 fixes, then verify them
 #   ./scripts/lab.sh status          VM states and your current IP
 #   ./scripts/lab.sh down            disable the scan account and deallocate every VM
@@ -54,6 +54,9 @@ case "${1:-}" in
     ./scripts/connect.sh "${2:?Usage: $0 connect dc01|ws01|kali01 [username]}" "${3:-}"
     ;;
   scan)
+    # The scan account is enabled on DC01 through Run Command, which needs the
+    # VM running, so start the lab first (harmless if it is already up).
+    ./scripts/start-lab.sh
     ./scripts/scan-account.sh enable
     open_access
     echo "Leave this window open; Nessus is at https://localhost:8834"
