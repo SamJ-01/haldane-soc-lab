@@ -73,3 +73,9 @@ is a 4624.
 ![T3: repeated failed logons for the test account](../images/phase6-t3-failures.webp)
 
 ![T3: the final attempt succeeds](../images/phase6-t3-success.webp)
+
+Sentinel recorded exactly what HAL-004 looks for: **12 failed logons (4625)
+on WS01** between 14:10:31 and 14:12:07, then a **successful logon (4624) at
+14:12:46**.
+
+![T3: 12 failures then a success for the test account](../images/phase6-t3-check.webp)
