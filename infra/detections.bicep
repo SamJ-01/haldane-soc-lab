@@ -317,7 +317,7 @@ resource hal005 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
   kind: 'Scheduled'
   properties: {
     displayName: 'HAL-005 New service or scheduled task created from the command line'
-    description: 'A Windows service or scheduled task was created or changed with sc.exe, schtasks.exe or a PowerShell cmdlet. A common way to keep access after a reboot.'
+    description: 'A Windows service or scheduled task was created or changed with sc.exe, schtasks.exe or a PowerShell cmdlet, seen by Defender for Endpoint or Sysmon. A common way to keep access after a reboot.'
     severity: 'Medium'
     enabled: true
     query: loadTextContent('../detections/HAL-005-new-service-or-scheduled-task.kql')
@@ -344,7 +344,7 @@ resource hal005 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
         fieldMappings: [
           {
             identifier: 'FullName'
-            columnName: 'DeviceName'
+            columnName: 'Host'
           }
         ]
       }
@@ -366,7 +366,7 @@ resource hal005 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
         fieldMappings: [
           {
             identifier: 'CommandLine'
-            columnName: 'ProcessCommandLine'
+            columnName: 'CommandLine'
           }
         ]
       }

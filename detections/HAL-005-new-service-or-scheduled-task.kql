@@ -4,8 +4,16 @@
 // creating a Windows service or a scheduled task that runs their program.
 // MITRE ATT&CK: T1543.003 Create or Modify System Process: Windows Service;
 //               T1053.005 Scheduled Task/Job: Scheduled Task
-// Data: DeviceProcessEvents (Microsoft Defender for Endpoint)
 // Severity: Medium
+//
+// Data: TWO independent process-creation sources, combined:
+//   - DeviceProcessEvents (Microsoft Defender for Endpoint)
+//   - Sysmon event ID 1 (process created), in the Event table
+// During testing Defender recorded "schtasks /delete" but not the
+// "schtasks /create" a minute earlier; Sysmon recorded both. Defender does not
+// guarantee to record every process, so the rule reads both and removes the
+// duplicate when both saw the same process (same host, process ID and
+// 5-minute window).
 //
 // Watches the three usual command-line routes:
 //   sc.exe create / sc.exe config ... binPath=   (new or changed service)
@@ -16,23 +24,55 @@
 //
 // Ingestion delay: looks back 2 hours of event time but only alerts on
 // events that arrived in the last hour (same approach as HAL-003). When
-// running this by hand in Logs, remove the ingestion_time() line.
+// running this by hand in Logs, remove both ingestion_time() lines.
 //
 // Known gap (Phase 7): services or tasks created directly through the
 // Windows API (no command line), or typed into an already-open PowerShell
 // window, are not seen. Closing it needs the Defender DeviceEvents table or
 // Windows audit events 4697/4698, neither of which is collected yet.
 
-DeviceProcessEvents
-| where TimeGenerated > ago(2h)
-| where ingestion_time() > ago(1h)
-| where (FileName =~ "sc.exe" and ProcessCommandLine has_any ("create", "config") and ProcessCommandLine has "binpath")
-     or (FileName =~ "schtasks.exe" and ProcessCommandLine has "/create")
-     or (FileName in~ ("powershell.exe", "pwsh.exe")
-         and ProcessCommandLine has_any ("New-Service", "Register-ScheduledTask"))
-| extend Method = case(FileName =~ "sc.exe", "Service (sc.exe)",
-                       FileName =~ "schtasks.exe", "Scheduled task (schtasks.exe)",
+let Lookback = 2h;
+let Watched = dynamic(["sc.exe", "schtasks.exe", "powershell.exe", "pwsh.exe"]);
+let FromDefender = DeviceProcessEvents
+    | where TimeGenerated > ago(Lookback)
+    | where ingestion_time() > ago(1h)
+    | where FileName in~ (Watched)
+    | project TimeGenerated, Host = tolower(DeviceName), ProcessId = tolong(ProcessId),
+              FileName = tolower(FileName), CommandLine = ProcessCommandLine,
+              AccountName, AccountDomain,
+              Parent = tolower(InitiatingProcessFileName), DataSource = "Defender for Endpoint";
+let FromSysmon = Event
+    | where TimeGenerated > ago(Lookback)
+    | where ingestion_time() > ago(1h)
+    | where Source == "Microsoft-Windows-Sysmon" and EventID == 1
+    | where EventData has_any (Watched)
+    | extend Data = parse_xml(EventData).DataItem.EventData.Data
+    | mv-apply Data on (
+        summarize Fields = make_bag(bag_pack(tostring(Data["@Name"]), tostring(Data["#text"]))))
+    | extend User = tostring(Fields.User)
+    | project TimeGenerated, Host = tolower(Computer), ProcessId = tolong(Fields.ProcessId),
+              FileName = tolower(extract(@"[^\\]+$", 0, tostring(Fields.Image))),
+              CommandLine = tostring(Fields.CommandLine),
+              AccountName = tolower(extract(@"[^\\]+$", 0, User)),
+              AccountDomain = tolower(extract(@"^([^\\]+)\\", 1, User)),
+              Parent = tolower(extract(@"[^\\]+$", 0, tostring(Fields.ParentImage))),
+              DataSource = "Sysmon";
+union FromDefender, FromSysmon
+| where (FileName == "sc.exe" and CommandLine has_any ("create", "config") and CommandLine has "binpath")
+     or (FileName == "schtasks.exe" and CommandLine has "/create")
+     or (FileName in ("powershell.exe", "pwsh.exe")
+         and CommandLine has_any ("New-Service", "Register-ScheduledTask"))
+| summarize TimeGenerated = min(TimeGenerated),
+            SeenBy        = strcat_array(make_set(DataSource), " + "),
+            CommandLine   = take_any(CommandLine),
+            AccountName   = take_any(AccountName),
+            AccountDomain = take_any(AccountDomain),
+            Parent        = take_any(Parent),
+            FileName      = take_any(FileName)
+    by Host, ProcessId, Window = bin(TimeGenerated, 5m)
+| extend Method = case(FileName == "sc.exe", "Service (sc.exe)",
+                       FileName == "schtasks.exe", "Scheduled task (schtasks.exe)",
                        "PowerShell cmdlet")
-| project TimeGenerated, DeviceName, AccountName, AccountDomain, Method,
-          Parent = InitiatingProcessFileName, ProcessCommandLine
+| project TimeGenerated, Host, AccountName, AccountDomain, Method, Parent,
+          CommandLine, SeenBy
 | order by TimeGenerated desc

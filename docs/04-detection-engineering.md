@@ -241,7 +241,7 @@ creating a Windows service or a scheduled task that runs their program.
 | | |
 |---|---|
 | **MITRE ATT&CK** | T1543.003 Windows Service; T1053.005 Scheduled Task |
-| **Data** | `DeviceProcessEvents` (Defender for Endpoint): `sc.exe create/config binPath=`, `schtasks.exe /create`, `New-Service` / `Register-ScheduledTask` |
+| **Data** | Two process sources combined: `DeviceProcessEvents` (Defender for Endpoint) **and** Sysmon event 1, de-duplicated. Watches `sc.exe create/config binPath=`, `schtasks.exe /create`, `New-Service` / `Register-ScheduledTask` |
 | **Severity** | Medium |
 
 Encoded PowerShell would hide the PowerShell route from this rule, but HAL-003
@@ -258,6 +258,27 @@ look and no exclusions are needed.
 would only print text and was never run) with `schtasks.exe`, then deleted it.
 
 ![Harmless scheduled task created on WS01](../images/phase4-hal005-test.webp)
+
+### Defender missed the event
+
+The first version of HAL-005 read only Defender's `DeviceProcessEvents`, and
+it never alerted. Checking the raw data showed why: Defender had recorded the
+`schtasks /delete` at 04:14 but **not the `schtasks /create` at 04:13**, even
+though WS01's data was up to date (latest event 04:55).
+
+![Defender recorded the delete but not the create](../images/phase4-hal005-mde-missed-create.webp)
+
+Sysmon, the second process source set up in Phase 2, had recorded **both**
+(04:13:19 create, 04:14:06 delete):
+
+![Sysmon recorded both the create and the delete](../images/phase4-hal005-sysmon.webp)
+
+Defender for Endpoint does not promise to record every process in this
+table. A rule built on one data source is blind to whatever that source
+drops. HAL-005 now reads **both** sources and removes duplicates when both
+saw the same process (same host, process ID and 5-minute window), and each
+result says which source(s) saw it (`SeenBy`). This is the clearest lesson of
+Phase 4: **test the data, not just the query**.
 
 **Known gap** (for Phase 7): services or tasks created directly through the
 Windows API, with no command line, are not seen. Closing it needs Defender's
