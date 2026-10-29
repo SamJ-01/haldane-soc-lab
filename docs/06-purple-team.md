@@ -38,3 +38,15 @@ Phase 3 windows (8 and 15 Oct), so this scan was **not** approved. If the
 tuning in HAL-001 and HAL-003 is too broad, nothing will alert.
 
 ![T1: credentialed scan completed, valid credentials on both servers](../images/phase6-t1-scan.webp)
+
+## Finding: no account lockout policy
+
+Before the password test (T3) I checked the domain's lockout policy so the
+test account would not be locked part-way through. The answer was more
+important than the test: **Lockout threshold: Never**. An attacker can
+guess passwords against any domain account without limit; only detection
+(HAL-004) stands in the way. This goes into Phase 7 as a recommendation
+(for example, lock after 10 failures for 10 minutes, which slows guessing
+without making it easy for an attacker to lock everyone out).
+
+![Domain password policy: lockout threshold Never](../images/phase6-lockout-policy.webp)
