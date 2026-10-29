@@ -247,6 +247,13 @@ creating a Windows service or a scheduled task that runs their program.
 Encoded PowerShell would hide the PowerShell route from this rule, but HAL-003
 catches encoded PowerShell, so the two rules cover each other.
 
+**Baseline (30 days):** nothing. No service or scheduled task was created
+from the command line in normal use (the HAL-003 data check had already
+shown that Defender process events were arriving), so any match is worth a
+look and no exclusions are needed.
+
+![HAL-005 baseline: no results in 30 days](../images/phase4-hal005-baseline.webp)
+
 **Known gap** (for Phase 7): services or tasks created directly through the
 Windows API, with no command line, are not seen. Closing it needs Defender's
 `DeviceEvents` table or Windows audit events 4697/4698, neither of which is
