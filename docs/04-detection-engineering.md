@@ -285,6 +285,20 @@ With both sources, the rule finds the test that Defender alone missed
 
 ![HAL-005 with both sources: the 04:13 test, seen by Sysmon](../images/phase4-hal005-results.webp)
 
+After redeploying, the rule raised incident 10 for the 04:13 test, an event
+that exists only in Sysmon (note the full `C:\Windows\system32\schtasks.exe`
+path, which is how Sysmon records it; Defender records just `schtasks.exe`):
+
+![HAL-005 incident 10: the test Defender missed](../images/phase4-hal005-incident.webp)
+
+A second test (`HAL005-test2`, 05:08) raised incident 11. At first it looked
+unexpected because the account was `a.patel`, not `haldaneadmin`. The command
+line showed it was my own test; the account was the one I happened to be
+signed in to WS01 with after an RDP reconnect. The rule had attributed the
+account correctly; I checked it against the session rather than assuming.
+
+![HAL-005 incident 11: second test, run as a.patel](../images/phase4-hal005-incident-test2.webp)
+
 **Known gap** (for Phase 7): services or tasks created directly through the
 Windows API, with no command line, are not seen. Closing it needs Defender's
 `DeviceEvents` table or Windows audit events 4697/4698, neither of which is
