@@ -280,6 +280,11 @@ saw the same process (same host, process ID and 5-minute window), and each
 result says which source(s) saw it (`SeenBy`). This is the clearest lesson of
 Phase 4: **test the data, not just the query**.
 
+With both sources, the rule finds the test that Defender alone missed
+(`SeenBy` = Sysmon):
+
+![HAL-005 with both sources: the 04:13 test, seen by Sysmon](../images/phase4-hal005-results.webp)
+
 **Known gap** (for Phase 7): services or tasks created directly through the
 Windows API, with no command line, are not seen. Closing it needs Defender's
 `DeviceEvents` table or Windows audit events 4697/4698, neither of which is
