@@ -181,6 +181,12 @@ scanner hits are suppressed.
 
 ![Harmless encoded PowerShell test on WS01](../images/phase4-hal003-test.webp)
 
+About 15 minutes later the tuned query returned exactly that one event
+(03:26:55 UTC, WS01, `haldaneadmin`, parent `powershell.exe`), while the
+scanner's hits stayed suppressed.
+
+![HAL-003 result: only the test command](../images/phase4-hal003-results.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
