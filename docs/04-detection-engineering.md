@@ -211,6 +211,21 @@ guessing may have worked.
 | **Severity** | High |
 | **Testing** | In Phase 6 (purple-team exercise), from KALI01 |
 
+**Baseline (30 days):** only 7 failed logons in total, never more than one
+per account per hour, so a threshold of 10 leaves plenty of headroom.
+
+![HAL-004 baseline: 7 failures, at most 1 per hour](../images/phase4-hal004-baseline.webp)
+
+Six of the seven "accounts" are not accounts at all: they are
+`${jndi:ldap://log4shell-smb-…w.nessus.org/nessus}` strings. During the
+Phase 3 scans Nessus put Log4Shell (CVE-2021-44228) test strings into the
+SMB **username** field, to see whether anything that logs failed logons
+passes them to a vulnerable Java logging library, which would then call
+back to Tenable's server. The seventh, `#`, is my own mistake from Phase 3
+(the `HALDANE\#` username typed into the RDP prompt). Lesson: the
+username field of a failed logon is attacker-controlled text and must be
+treated as untrusted input.
+
 **Known gaps** (for Phase 7): Kerberos password failures on the DC are logged
 as 4771, not 4625, and password spraying (a few attempts against many
 accounts) stays under a per-account threshold.
