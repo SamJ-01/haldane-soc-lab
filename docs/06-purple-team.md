@@ -90,3 +90,20 @@ on WS01** between 14:10:31 and 14:12:07, then a **successful logon (4624) at
 14:12:46**.
 
 ![T3: 12 failures then a success for the test account](../images/phase6-t3-check.webp)
+
+## Clean-up, checked from the logs
+
+Rather than rely on memory, I checked the clean-up in Sentinel:
+
+| Step | Event | Result |
+|---|---|---|
+| Scan account disabled after T1 | 4725 on DC01, `svc-nessus` | ✅ 14:22 |
+| Test account removed from WS01 Administrators | 4733 on WS01, SID ending -5101 | ✅ 14:23 |
+| Test account `hal-pt.test` disabled | 4725 on DC01, `hal-pt.test` | ❌ **No event: not done** |
+
+I thought the test account had been disabled; the logs showed it had not.
+The lab was shut down, so the account could not be used, and it was the
+first task of the next session. A small example of why clean-up is
+verified, not assumed.
+
+![Clean-up check: scan account disabled and test account removed from Administrators, but no disable event for the test account](../images/phase6-cleanup-check.webp)
