@@ -184,7 +184,7 @@ resource hal003 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
     enabled: true
     query: loadTextContent('../detections/HAL-003-encoded-powershell.kql')
     queryFrequency: 'PT1H'
-    queryPeriod: 'PT1H'
+    queryPeriod: 'PT2H'
     triggerOperator: 'GreaterThan'
     triggerThreshold: 0
     suppressionEnabled: false

@@ -19,6 +19,13 @@
 // time match an approved scan window in the same ApprovedScanWindows
 // watchlist that HAL-001 uses. Process events carry no source IP, so the IP
 // part of the window cannot be checked here.
+//
+// Ingestion delay: Defender for Endpoint events can reach Sentinel 10-15
+// minutes after they happen, so a rule that only looks at the last hour of
+// event time can miss them. The rule therefore looks back 2 hours of event
+// time (queryPeriod PT2H) but only alerts on events that ARRIVED in the last
+// hour (ingestion_time()), so nothing is missed and nothing alerts twice.
+// When running this by hand in Logs, remove the ingestion_time() line.
 
 // column_ifexists(): if the watchlist is missing the rule still runs and
 // simply alerts on everything (fails safe).
@@ -28,6 +35,7 @@ let ScanWindows = _GetWatchlist('ApprovedScanWindows')
               EndUtc   = todatetime(column_ifexists("EndUtc", ""));
 let Encoded = DeviceProcessEvents
     | where TimeGenerated > ago(1d)
+    | where ingestion_time() > ago(1h)
     | where FileName in~ ("powershell.exe", "pwsh.exe")
     | where ProcessCommandLine matches regex @"(?i)\s[-/]e(c|n|nc|nco|ncod|ncode|ncoded|ncodedc|ncodedco|ncodedcom|ncodedcomm|ncodedcomma|ncodedcomman|ncodedcommand)?\s"
     | extend Account = tolower(AccountName);

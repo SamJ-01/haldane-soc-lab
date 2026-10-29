@@ -139,7 +139,7 @@ with `-e`.
 | **MITRE ATT&CK** | T1059.001 PowerShell; T1027 Obfuscated Files or Information |
 | **Data** | `DeviceProcessEvents` from Microsoft Defender for Endpoint (first rule using MDE data) |
 | **Severity** | Medium |
-| **Runs** | Every hour, over the last hour; one incident per process |
+| **Runs** | Every hour, over the last 2 hours of event time but only events that arrived in the last hour (handles Defender's ingestion delay); one incident per process |
 
 ### Baseline first
 
@@ -192,4 +192,5 @@ scanner's hits stayed suppressed.
 | Problem | Cause | Fix |
 | --- | --- | --- |
 | No incidents visible after the rule ran | The Defender portal's incident list filters on "Priority score: 15-100" by default | Removed the filter; the three incidents were there |
+| HAL-003 found the test in Logs but raised no incident | Defender for Endpoint events reach Sentinel 10-15 minutes after they happen. The rule ran before the test event arrived, and its next run only looked at the hour after that, so the event fell in the gap | The rule now looks back 2 hours of event time but only alerts on events that arrived in the last hour (`ingestion_time()`), so late events are caught once and never twice |
 | Deploying the tuned rule failed: "Failed to resolve scalar expression named 'Account'" | Sentinel validates a rule's query when it is saved; the new watchlist had not been indexed yet, so its columns did not exist | Read the watchlist columns with `column_ifexists()`, so the rule stays valid and fails safe (every logon alerts) if the watchlist is missing |
