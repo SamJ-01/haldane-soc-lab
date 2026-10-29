@@ -61,6 +61,10 @@ case "${1:-}" in
     open_access
     echo "Leave this window open; Nessus is at https://localhost:8834"
     echo "When the scan is finished: ./scripts/scan-account.sh disable (or lab.sh down)"
+    # Kali needs a moment to boot and the access rule a moment to apply;
+    # connecting straight away times out.
+    echo "Waiting 60 seconds for Kali to finish starting..."
+    sleep 60
     ./scripts/connect.sh kali01
     ;;
   fix)
