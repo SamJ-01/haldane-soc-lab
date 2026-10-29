@@ -171,6 +171,16 @@ the account and time match an approved scan window, reusing the same
 both rules. Process events carry no source IP, so only account and time can
 be checked here.
 
+With the watchlist exclusion, the same 30 days return nothing: the four
+scanner hits are suppressed.
+
+![HAL-003 tuned: the scanner hits are suppressed](../images/phase4-hal003-tuned.webp)
+
+**Test:** on WS01 I ran a harmless encoded command that only prints
+`HAL-003 test`.
+
+![Harmless encoded PowerShell test on WS01](../images/phase4-hal003-test.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
