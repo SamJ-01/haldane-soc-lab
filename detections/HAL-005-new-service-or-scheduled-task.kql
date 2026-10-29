@@ -1,0 +1,38 @@
+// HAL-005: New service or scheduled task created from the command line
+//
+// Why: after getting in, attackers make sure they come back after a reboot by
+// creating a Windows service or a scheduled task that runs their program.
+// MITRE ATT&CK: T1543.003 Create or Modify System Process: Windows Service;
+//               T1053.005 Scheduled Task/Job: Scheduled Task
+// Data: DeviceProcessEvents (Microsoft Defender for Endpoint)
+// Severity: Medium
+//
+// Watches the three usual command-line routes:
+//   sc.exe create / sc.exe config ... binPath=   (new or changed service)
+//   schtasks.exe /create                          (new scheduled task)
+//   powershell -Command "New-Service / Register-ScheduledTask ..."
+// Encoded PowerShell would hide the PowerShell route from this rule, but
+// HAL-003 catches encoded PowerShell, so the two rules cover each other.
+//
+// Ingestion delay: looks back 2 hours of event time but only alerts on
+// events that arrived in the last hour (same approach as HAL-003). When
+// running this by hand in Logs, remove the ingestion_time() line.
+//
+// Known gap (Phase 7): services or tasks created directly through the
+// Windows API (no command line), or typed into an already-open PowerShell
+// window, are not seen. Closing it needs the Defender DeviceEvents table or
+// Windows audit events 4697/4698, neither of which is collected yet.
+
+DeviceProcessEvents
+| where TimeGenerated > ago(2h)
+| where ingestion_time() > ago(1h)
+| where (FileName =~ "sc.exe" and ProcessCommandLine has_any ("create", "config") and ProcessCommandLine has "binpath")
+     or (FileName =~ "schtasks.exe" and ProcessCommandLine has "/create")
+     or (FileName in~ ("powershell.exe", "pwsh.exe")
+         and ProcessCommandLine has_any ("New-Service", "Register-ScheduledTask"))
+| extend Method = case(FileName =~ "sc.exe", "Service (sc.exe)",
+                       FileName =~ "schtasks.exe", "Scheduled task (schtasks.exe)",
+                       "PowerShell cmdlet")
+| project TimeGenerated, DeviceName, AccountName, AccountDomain, Method,
+          Parent = InitiatingProcessFileName, ProcessCommandLine
+| order by TimeGenerated desc

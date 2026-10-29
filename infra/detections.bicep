@@ -244,3 +244,141 @@ resource hal003 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
     }
   }
 }
+
+resource hal004 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
+  scope: workspace
+  name: guid(workspace.id, 'HAL-004')
+  kind: 'Scheduled'
+  properties: {
+    displayName: 'HAL-004 Many failed logons followed by a successful logon'
+    description: 'At least 10 failed logons for one account on one machine, followed by a successful logon for the same account. Possible successful password guessing.'
+    severity: 'High'
+    enabled: true
+    query: loadTextContent('../detections/HAL-004-failed-logons-then-success.kql')
+    queryFrequency: 'PT1H'
+    queryPeriod: 'PT2H'
+    triggerOperator: 'GreaterThan'
+    triggerThreshold: 0
+    suppressionEnabled: false
+    suppressionDuration: 'PT1H'
+    tactics: [
+      'CredentialAccess'
+    ]
+    techniques: [
+      'T1110'
+    ]
+    eventGroupingSettings: {
+      aggregationKind: 'AlertPerResult'
+    }
+    entityMappings: [
+      {
+        entityType: 'Account'
+        fieldMappings: [
+          {
+            identifier: 'Name'
+            columnName: 'Account'
+          }
+        ]
+      }
+      {
+        entityType: 'Host'
+        fieldMappings: [
+          {
+            identifier: 'FullName'
+            columnName: 'Computer'
+          }
+        ]
+      }
+      {
+        entityType: 'IP'
+        fieldMappings: [
+          {
+            identifier: 'Address'
+            columnName: 'SuccessIP'
+          }
+        ]
+      }
+    ]
+    incidentConfiguration: {
+      createIncident: true
+      groupingConfiguration: {
+        enabled: true
+        reopenClosedIncident: false
+        lookbackDuration: 'PT5H'
+        matchingMethod: 'AllEntities'
+      }
+    }
+  }
+}
+
+resource hal005 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
+  scope: workspace
+  name: guid(workspace.id, 'HAL-005')
+  kind: 'Scheduled'
+  properties: {
+    displayName: 'HAL-005 New service or scheduled task created from the command line'
+    description: 'A Windows service or scheduled task was created or changed with sc.exe, schtasks.exe or a PowerShell cmdlet. A common way to keep access after a reboot.'
+    severity: 'Medium'
+    enabled: true
+    query: loadTextContent('../detections/HAL-005-new-service-or-scheduled-task.kql')
+    queryFrequency: 'PT1H'
+    queryPeriod: 'PT2H'
+    triggerOperator: 'GreaterThan'
+    triggerThreshold: 0
+    suppressionEnabled: false
+    suppressionDuration: 'PT1H'
+    tactics: [
+      'Persistence'
+      'PrivilegeEscalation'
+    ]
+    techniques: [
+      'T1543'
+      'T1053'
+    ]
+    eventGroupingSettings: {
+      aggregationKind: 'AlertPerResult'
+    }
+    entityMappings: [
+      {
+        entityType: 'Host'
+        fieldMappings: [
+          {
+            identifier: 'FullName'
+            columnName: 'DeviceName'
+          }
+        ]
+      }
+      {
+        entityType: 'Account'
+        fieldMappings: [
+          {
+            identifier: 'Name'
+            columnName: 'AccountName'
+          }
+          {
+            identifier: 'NTDomain'
+            columnName: 'AccountDomain'
+          }
+        ]
+      }
+      {
+        entityType: 'Process'
+        fieldMappings: [
+          {
+            identifier: 'CommandLine'
+            columnName: 'ProcessCommandLine'
+          }
+        ]
+      }
+    ]
+    incidentConfiguration: {
+      createIncident: true
+      groupingConfiguration: {
+        enabled: true
+        reopenClosedIncident: false
+        lookbackDuration: 'PT5H'
+        matchingMethod: 'AllEntities'
+      }
+    }
+  }
+}

@@ -193,6 +193,50 @@ resolved as *Informational, expected activity – Security testing*.
 
 ![HAL-003 incident linking WS01, the account and the command](../images/phase4-hal003-incident.webp)
 
+## HAL-004: Many failed logons followed by a successful logon
+
+**Query:** [`detections/HAL-004-failed-logons-then-success.kql`](../detections/HAL-004-failed-logons-then-success.kql)
+(written with AI assistance; baseline and testing by me).
+
+**Why:** password guessing produces a burst of failed logons for one account.
+Failures on their own are mostly typos and expired passwords; a burst
+**followed by a success** for the same account on the same machine means the
+guessing may have worked.
+
+| | |
+|---|---|
+| **MITRE ATT&CK** | T1110.001 Brute Force: Password Guessing |
+| **Data** | `SecurityEvent` 4625 (failed logon) then 4624 (successful logon, types 2/3/10) |
+| **Threshold** | 10 or more failures for one account on one machine, then a success within 30 minutes of the last failure |
+| **Severity** | High |
+| **Testing** | In Phase 6 (purple-team exercise), from KALI01 |
+
+**Known gaps** (for Phase 7): Kerberos password failures on the DC are logged
+as 4771, not 4625, and password spraying (a few attempts against many
+accounts) stays under a per-account threshold.
+
+## HAL-005: New service or scheduled task created from the command line
+
+**Query:** [`detections/HAL-005-new-service-or-scheduled-task.kql`](../detections/HAL-005-new-service-or-scheduled-task.kql)
+(written with AI assistance; baseline and testing by me).
+
+**Why:** after getting in, attackers make sure they survive a reboot by
+creating a Windows service or a scheduled task that runs their program.
+
+| | |
+|---|---|
+| **MITRE ATT&CK** | T1543.003 Windows Service; T1053.005 Scheduled Task |
+| **Data** | `DeviceProcessEvents` (Defender for Endpoint): `sc.exe create/config binPath=`, `schtasks.exe /create`, `New-Service` / `Register-ScheduledTask` |
+| **Severity** | Medium |
+
+Encoded PowerShell would hide the PowerShell route from this rule, but HAL-003
+catches encoded PowerShell, so the two rules cover each other.
+
+**Known gap** (for Phase 7): services or tasks created directly through the
+Windows API, with no command line, are not seen. Closing it needs Defender's
+`DeviceEvents` table or Windows audit events 4697/4698, neither of which is
+collected yet.
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |

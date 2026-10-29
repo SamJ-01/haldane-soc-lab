@@ -1,0 +1,55 @@
+// HAL-004: Many failed logons followed by a successful logon
+//
+// Why: password guessing (brute force) shows up as a burst of failed logons
+// for one account. Failures alone are noise (typos, expired passwords); a
+// burst FOLLOWED BY A SUCCESS for the same account on the same machine means
+// the guessing may have worked.
+// MITRE ATT&CK: T1110 Brute Force (T1110.001 Password Guessing)
+// Data: SecurityEvent from DC01 and WS01
+//   4625 = an account failed to log on
+//   4624 = an account successfully logged on (types 2 interactive,
+//          3 network, 10 RDP)
+// Severity: High
+//
+// Threshold: 10 failures. The 30-day baseline (see docs/04) sets this.
+// Machine accounts (ending in $) are ignored.
+//
+// Ingestion delay: the rule looks back 2 hours so a burst that straddles two
+// runs is still counted, but only alerts on SUCCESSES that arrived in the
+// last hour, so each success alerts once. When running this by hand in Logs,
+// remove the ingestion_time() line and widen ago(2h).
+//
+// Known gaps (Phase 7): Kerberos password failures on the DC are logged as
+// 4771, not 4625; password spraying (few attempts against many accounts)
+// stays under a per-account threshold.
+
+let FailureThreshold = 10;
+let Failures = SecurityEvent
+    | where TimeGenerated > ago(2h)
+    | where EventID == 4625
+    | where isnotempty(TargetUserName) and TargetUserName !endswith "$"
+    | extend Account = tolower(TargetUserName)
+    | summarize FailedAttempts = count(),
+                FirstFailure   = min(TimeGenerated),
+                LastFailure    = max(TimeGenerated),
+                FailureIPs     = make_set(IpAddress, 10)
+        by Account, Computer
+    | where FailedAttempts >= FailureThreshold;
+let Successes = SecurityEvent
+    | where TimeGenerated > ago(2h)
+    | where ingestion_time() > ago(1h)
+    | where EventID == 4624
+    | where LogonType in (2, 3, 10)
+    | where isnotempty(TargetUserName) and TargetUserName !endswith "$"
+    | extend Account = tolower(TargetUserName)
+    | project SuccessTime = TimeGenerated, Account, Computer,
+              SuccessIP = IpAddress, LogonType;
+Failures
+| join kind=inner Successes on Account, Computer
+| where SuccessTime between (FirstFailure .. (LastFailure + 30m))
+| summarize arg_min(SuccessTime, SuccessIP, LogonType)
+    by Account, Computer, FailedAttempts, FirstFailure, LastFailure,
+       FailureIPs = tostring(FailureIPs)
+| project Account, Computer, FailedAttempts, FirstFailure, LastFailure,
+          FailureIPs, FirstSuccess = SuccessTime, SuccessIP, LogonType
+| order by FailedAttempts desc
