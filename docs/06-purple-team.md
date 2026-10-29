@@ -28,7 +28,7 @@
 |---|---|---|---|---|
 | T1 | 13:32–13:50 | (pending) | (pending) | Scan completed with valid credentials on both servers |
 | T2 | 14:09 | (pending) | (pending) | Test account added to WS01 local Administrators |
-| T3 | | | | |
+| T3 | 14:10–14:13 | (pending) | (pending) | Repeated wrong passwords, then success |
 
 ## T1: Credentialed scan outside an approved window
 
@@ -62,3 +62,14 @@ A first attempt from a standard user's session (`a.patel`) was refused with
 administrator.
 
 ![T2: test account added to the local Administrators group](../images/phase6-t2-add.webp)
+
+## T3: Repeated wrong passwords, then the right one
+
+From 14:10 to 14:13 UTC, on WS01, I tried to start a program as
+`hal-pt.test` with a wrong password over and over (`runas`), then with the
+correct one. Every failure is a 4625 event on WS01, and the final success
+is a 4624.
+
+![T3: repeated failed logons for the test account](../images/phase6-t3-failures.webp)
+
+![T3: the final attempt succeeds](../images/phase6-t3-success.webp)
