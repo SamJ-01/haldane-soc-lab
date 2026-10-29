@@ -193,6 +193,21 @@ resolved as *Informational, expected activity – Security testing*.
 
 ![HAL-003 incident linking WS01, the account and the command](../images/phase4-hal003-incident.webp)
 
+After the ingestion-delay change was deployed, two more HAL-003 incidents
+appeared in the same rule run (04:12):
+
+| Incident | Event time | What it was |
+|---|---|---|
+| 9 | 03:48:00 | A second test run, as expected |
+| 8 | 03:26:55 | The **first** test again: a duplicate of incident 6 |
+
+Incident 8 happened because redeploying a rule restarts its schedule. The
+new version's first run counted every event that had *arrived* in the last
+hour, which still included the 03:26 test, and incident 6 for it was
+already closed, so Sentinel opened a new incident rather than adding to it.
+It is a one-off after a redeploy, not a fault in steady running; both were
+resolved as security testing, incident 8 as a duplicate of 6.
+
 ## HAL-004: Many failed logons followed by a successful logon
 
 **Query:** [`detections/HAL-004-failed-logons-then-success.kql`](../detections/HAL-004-failed-logons-then-success.kql)
@@ -310,4 +325,5 @@ collected yet.
 | --- | --- | --- |
 | No incidents visible after the rule ran | The Defender portal's incident list filters on "Priority score: 15-100" by default | Removed the filter; the three incidents were there |
 | Risk of HAL-003 missing late-arriving events (found while waiting for the first incident) | Defender for Endpoint events reach Sentinel 10-15 minutes after they happen. A rule that looks at only the last hour of event time can run before an event arrives and then never look at it again | The rule now looks back 2 hours of event time but only alerts on events that arrived in the last hour (`ingestion_time()`), so late events are caught once and never twice. (The first test was in fact caught: the incident was created at 03:47, about 20 minutes after the test, and I had checked too early.) |
+| Redeploying HAL-003 re-alerted on a test that had already been triaged (incident 8 duplicated incident 6) | A redeployed rule starts a fresh schedule, and its first run looked at everything that had arrived in the last hour, including the already-closed test event | Expected after a redeploy; closed as a duplicate. When changing a live rule, check for re-alerts on recent events straight afterwards |
 | Deploying the tuned rule failed: "Failed to resolve scalar expression named 'Account'" | Sentinel validates a rule's query when it is saved; the new watchlist had not been indexed yet, so its columns did not exist | Read the watchlist columns with `column_ifexists()`, so the rule stays valid and fails safe (every logon alerts) if the watchlist is missing |
