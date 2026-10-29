@@ -1,7 +1,44 @@
 # Phase 4: Detection engineering
 
-> **In progress.** Rules are written in KQL, stored in [`detections/`](../detections),
-> tested against real lab data, then deployed as scheduled analytics rules.
+> **Done.** Five detection rules written in KQL, stored in
+> [`detections/`](../detections), deployed from
+> [`infra/detections.bicep`](../infra/detections.bicep) with
+> [`scripts/deploy-detections.sh`](../scripts/deploy-detections.sh), and each
+> one baselined, tested, and triaged in Microsoft Defender XDR.
+
+## Summary
+
+| Rule | Detects | ATT&CK | Data | Severity | Tested | Result |
+|---|---|---|---|---|---|---|
+| HAL-001 | Privileged account network logon from outside the corporate subnet | T1078, T1021 | Windows Security events | High | Phase 3 re-scan + admin RDP | ✅ Fired; tuned with a scan-window watchlist |
+| HAL-002 | Member added to a privileged AD group | T1098 | Windows Security events | High | Test account added to Domain Admins | ✅ Fired |
+| HAL-003 | Encoded PowerShell command | T1059.001, T1027 | Defender for Endpoint | Medium | Harmless encoded command | ✅ Fired; scanner excluded by the same watchlist |
+| HAL-004 | Many failed logons then a success | T1110.001 | Windows Security events | High | Deferred to Phase 6 (from KALI01) | Baselined; threshold set from data |
+| HAL-005 | New service or scheduled task | T1543.003, T1053.005 | Defender for Endpoint **+ Sysmon** | Medium | Harmless scheduled task, twice | ✅ Fired, after adding Sysmon |
+
+**What I learned**
+
+1. **Baseline before writing the rule.** The 30-day baselines found the
+   Nessus scanner running encoded PowerShell (HAL-003) and putting Log4Shell
+   test strings in usernames (HAL-004). Neither would have been found by
+   writing the rule first.
+2. **Tune narrowly.** Excluding the scanner account outright would blind two
+   rules to a stolen Domain Admin password. One watchlist of approved scan
+   windows (account, source IP, time) suppresses only authorised scans.
+3. **Test the data, not just the query.** Defender for Endpoint did not
+   record one of the HAL-005 test commands. Sysmon did. HAL-005 now reads
+   both sources and shows which saw each event.
+4. **Account for ingestion delay and redeploys.** Defender data arrives
+   10-15 minutes late, so rules look back 2 hours but only alert on data that
+   arrived in the last hour. Redeploying a rule can re-alert on recent events
+   (incident 8), so check straight after changing a live rule.
+5. **Triage before closing.** An incident naming an unexpected account
+   (`a.patel`) turned out to be my own test from a different session, but
+   it was confirmed from the command line and session, not assumed.
+
+**Known gaps carried to Phase 7:** Kerberos password failures (4771) and
+password spraying (HAL-004); services or tasks created through the Windows API
+with no command line (HAL-005).
 
 ## HAL-001: Privileged account network logon from outside the corporate subnet
 
