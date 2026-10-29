@@ -123,6 +123,54 @@ testing*, and the test account was then deleted.
 
 ![HAL-002 incident being resolved as security testing](../images/phase4-hal002-incident.webp)
 
+## HAL-003: Encoded PowerShell command
+
+**Query:** [`detections/HAL-003-encoded-powershell.kql`](../detections/HAL-003-encoded-powershell.kql)
+(the KQL was written with AI assistance; I ran the baseline, the test and verified the results).
+
+**Why:** attackers pass PowerShell commands as base64 with `-EncodedCommand`
+so that people and simple keyword searches can't read them. PowerShell also
+accepts short forms (`-e`, `-ec`, `-enc` …), so the rule uses a regex that
+matches every abbreviation but not `-ExecutionPolicy`, which also starts
+with `-e`.
+
+| | |
+|---|---|
+| **MITRE ATT&CK** | T1059.001 PowerShell; T1027 Obfuscated Files or Information |
+| **Data** | `DeviceProcessEvents` from Microsoft Defender for Endpoint (first rule using MDE data) |
+| **Severity** | Medium |
+| **Runs** | Every hour, over the last hour; one incident per process |
+
+### Baseline first
+
+Before writing the rule I checked what normally runs encoded PowerShell.
+
+1. **7 days: no results.** But the lab had been switched off for most of that
+   week, so an empty result proved nothing on its own.
+2. **Data check:** confirmed Defender process events were arriving from both
+   servers, so the data source was healthy.
+
+   ![Defender process events arriving from WS01 and DC01](../images/phase4-hal003-data-check.webp)
+
+3. **30 days: 4 hits.** All were `svc-nessus`, started by `wmiprvse.exe`
+   (WMI), on both servers.
+
+   ![30-day baseline: encoded PowerShell from svc-nessus via WMI](../images/phase4-hal003-baseline-30d.webp)
+
+All four fall inside the two approved scan windows (8 Oct 04:55–06:00 and
+15 Oct 09:35–10:10 UTC). Decoding the start of the command gives
+`Add-Type -TypeDefi…`: Nessus runs some of its credentialed checks as encoded
+PowerShell over WMI.
+
+![The four hits, all inside approved scan windows](../images/phase4-hal003-nessus-times.webp)
+
+This matters: a stolen Domain Admin password used over WMI would look
+exactly the same. So, as with HAL-001, the scanner is ignored **only** when
+the account and time match an approved scan window, reusing the same
+`ApprovedScanWindows` watchlist. One watchlist now controls scanner noise for
+both rules. Process events carry no source IP, so only account and time can
+be checked here.
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |

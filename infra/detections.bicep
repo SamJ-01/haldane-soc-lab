@@ -169,3 +169,78 @@ resource hal002 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
     }
   }
 }
+
+resource hal003 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
+  scope: workspace
+  dependsOn: [
+    scanWindows
+  ]
+  name: guid(workspace.id, 'HAL-003')
+  kind: 'Scheduled'
+  properties: {
+    displayName: 'HAL-003 Encoded PowerShell command'
+    description: 'PowerShell was started with -EncodedCommand (or any abbreviation of it), which hides the command from people and keyword searches. Ignored only for the approved vulnerability scanner account during an approved scan window.'
+    severity: 'Medium'
+    enabled: true
+    query: loadTextContent('../detections/HAL-003-encoded-powershell.kql')
+    queryFrequency: 'PT1H'
+    queryPeriod: 'PT1H'
+    triggerOperator: 'GreaterThan'
+    triggerThreshold: 0
+    suppressionEnabled: false
+    suppressionDuration: 'PT1H'
+    tactics: [
+      'Execution'
+      'DefenseEvasion'
+    ]
+    techniques: [
+      'T1059'
+      'T1027'
+    ]
+    eventGroupingSettings: {
+      aggregationKind: 'AlertPerResult'
+    }
+    entityMappings: [
+      {
+        entityType: 'Host'
+        fieldMappings: [
+          {
+            identifier: 'FullName'
+            columnName: 'DeviceName'
+          }
+        ]
+      }
+      {
+        entityType: 'Account'
+        fieldMappings: [
+          {
+            identifier: 'Name'
+            columnName: 'AccountName'
+          }
+          {
+            identifier: 'NTDomain'
+            columnName: 'AccountDomain'
+          }
+        ]
+      }
+      {
+        entityType: 'Process'
+        fieldMappings: [
+          {
+            identifier: 'CommandLine'
+            columnName: 'ProcessCommandLine'
+          }
+        ]
+      }
+    ]
+    incidentConfiguration: {
+      createIncident: true
+      groupingConfiguration: {
+        enabled: true
+        reopenClosedIncident: false
+        lookbackDuration: 'PT5H'
+        matchingMethod: 'AllEntities'
+      }
+    }
+  }
+}

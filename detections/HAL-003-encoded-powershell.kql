@@ -1,0 +1,44 @@
+// HAL-003: Encoded PowerShell command
+//
+// Why: attackers pass PowerShell as base64 (-EncodedCommand) to hide what it
+// does from people and from simple keyword searches. Nothing in this lab runs
+// encoded PowerShell in normal use (30-day baseline), so any match stands out.
+// MITRE ATT&CK: T1059.001 Command and Scripting Interpreter: PowerShell;
+//               T1027 Obfuscated Files or Information
+// Data: DeviceProcessEvents (Microsoft Defender for Endpoint, via the
+//       Defender XDR connector)
+// Severity: Medium
+//
+// The regex catches every abbreviation PowerShell accepts for -EncodedCommand
+// (-e, -ec, -en, -enc ... -encodedcommand, with - or /) but not
+// -ExecutionPolicy, which also starts with -e.
+//
+// Tuning: the 30-day baseline found 4 hits, all svc-nessus via wmiprvse.exe
+// during the two approved credentialed scans (Nessus runs some checks as
+// encoded PowerShell over WMI). They are ignored ONLY when the account AND
+// time match an approved scan window in the same ApprovedScanWindows
+// watchlist that HAL-001 uses. Process events carry no source IP, so the IP
+// part of the window cannot be checked here.
+
+// column_ifexists(): if the watchlist is missing the rule still runs and
+// simply alerts on everything (fails safe).
+let ScanWindows = _GetWatchlist('ApprovedScanWindows')
+    | project Account  = tolower(tostring(column_ifexists("Account", ""))),
+              StartUtc = todatetime(column_ifexists("StartUtc", "")),
+              EndUtc   = todatetime(column_ifexists("EndUtc", ""));
+let Encoded = DeviceProcessEvents
+    | where TimeGenerated > ago(1d)
+    | where FileName in~ ("powershell.exe", "pwsh.exe")
+    | where ProcessCommandLine matches regex @"(?i)\s[-/]e(c|n|nc|nco|ncod|ncode|ncoded|ncodedc|ncodedco|ncodedcom|ncodedcomm|ncodedcomma|ncodedcomman|ncodedcommand)?\s"
+    | extend Account = tolower(AccountName);
+let ApprovedScanEvents = Encoded
+    | join kind=inner ScanWindows on Account
+    | where TimeGenerated between (StartUtc .. EndUtc)
+    | distinct DeviceId, ReportId;
+Encoded
+| join kind=leftanti ApprovedScanEvents on DeviceId, ReportId
+| project TimeGenerated, DeviceName, AccountName, AccountDomain,
+          Parent = InitiatingProcessFileName,
+          ParentCommandLine = InitiatingProcessCommandLine,
+          ProcessCommandLine
+| order by TimeGenerated desc
