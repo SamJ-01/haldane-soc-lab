@@ -187,10 +187,16 @@ scanner's hits stayed suppressed.
 
 ![HAL-003 result: only the test command](../images/phase4-hal003-results.webp)
 
+The rule raised a Medium incident (ID 6) at 03:47, about 20 minutes after the
+test, linking WS01, `haldaneadmin` and the full encoded command line. It was
+resolved as *Informational, expected activity – Security testing*.
+
+![HAL-003 incident linking WS01, the account and the command](../images/phase4-hal003-incident.webp)
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
 | --- | --- | --- |
 | No incidents visible after the rule ran | The Defender portal's incident list filters on "Priority score: 15-100" by default | Removed the filter; the three incidents were there |
-| HAL-003 found the test in Logs but raised no incident | Defender for Endpoint events reach Sentinel 10-15 minutes after they happen. The rule ran before the test event arrived, and its next run only looked at the hour after that, so the event fell in the gap | The rule now looks back 2 hours of event time but only alerts on events that arrived in the last hour (`ingestion_time()`), so late events are caught once and never twice |
+| Risk of HAL-003 missing late-arriving events (found while waiting for the first incident) | Defender for Endpoint events reach Sentinel 10-15 minutes after they happen. A rule that looks at only the last hour of event time can run before an event arrives and then never look at it again | The rule now looks back 2 hours of event time but only alerts on events that arrived in the last hour (`ingestion_time()`), so late events are caught once and never twice. (The first test was in fact caught: the incident was created at 03:47, about 20 minutes after the test, and I had checked too early.) |
 | Deploying the tuned rule failed: "Failed to resolve scalar expression named 'Account'" | Sentinel validates a rule's query when it is saved; the new watchlist had not been indexed yet, so its columns did not exist | Read the watchlist columns with `column_ifexists()`, so the rule stays valid and fails safe (every logon alerts) if the watchlist is missing |
