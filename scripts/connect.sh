@@ -28,7 +28,9 @@ fi
 
 if [[ "$VM" == KALI* ]]; then
   echo "SSH to $VM ($IP). Nessus: https://localhost:8834 while this is open. Type exit to leave."
-  exec ssh -i "$HOME/.ssh/haldane_kali" -L 8834:localhost:8834 "haldaneadmin@${IP}"
+  # Keepalives stop mobile and home routers dropping a quiet connection.
+  exec ssh -i "$HOME/.ssh/haldane_kali" -o ServerAliveInterval=30 -o ServerAliveCountMax=4 \
+    -L 8834:localhost:8834 "haldaneadmin@${IP}"
 fi
 
 RDP_FILE="${TMPDIR:-/tmp}/haldane-${VM}.rdp"
