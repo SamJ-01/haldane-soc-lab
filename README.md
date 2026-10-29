@@ -1,6 +1,6 @@
 # Haldane SOC Lab
 
-> **Work in progress.** Phases 0–3 complete; Phase 4 (detection engineering) next.
+> **Work in progress.** Phases 0–3 complete; Phase 4 (detection engineering) in progress.
 
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
