@@ -27,7 +27,7 @@
 | # | Start–end (UTC) | HAL rule | Defender | Outcome |
 |---|---|---|---|---|
 | T1 | 13:32–13:50 | (pending) | (pending) | Scan completed with valid credentials on both servers |
-| T2 | | | | |
+| T2 | 14:09 | (pending) | (pending) | Test account added to WS01 local Administrators |
 | T3 | | | | |
 
 ## T1: Credentialed scan outside an approved window
@@ -50,3 +50,15 @@ guess passwords against any domain account without limit; only detection
 without making it easy for an attacker to lock everyone out).
 
 ![Domain password policy: lockout threshold Never](../images/phase6-lockout-policy.webp)
+
+## T2: Test account added to WS01's local Administrators group
+
+At 14:09 UTC I added `hal-pt.test` to WS01's local **Administrators** group.
+This produces event 4732 (member added to a local group), a different branch
+of HAL-002 from the Phase 4 test, which used Domain Admins (4728).
+
+A first attempt from a standard user's session (`a.patel`) was refused with
+"Access is denied", as it should be: a normal user cannot make anyone an
+administrator.
+
+![T2: test account added to the local Administrators group](../images/phase6-t2-add.webp)
