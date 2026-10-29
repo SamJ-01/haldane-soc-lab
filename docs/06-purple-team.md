@@ -26,6 +26,15 @@
 
 | # | Start–end (UTC) | HAL rule | Defender | Outcome |
 |---|---|---|---|---|
-| T1 | | | | |
+| T1 | 13:32–13:50 | (pending) | (pending) | Scan completed with valid credentials on both servers |
 | T2 | | | | |
 | T3 | | | | |
+
+## T1: Credentialed scan outside an approved window
+
+On 29 Oct I ran the same credentialed Nessus scan as in Phase 3, from
+13:32 to 13:50 UTC. The `ApprovedScanWindows` watchlist only lists the two
+Phase 3 windows (8 and 15 Oct), so this scan was **not** approved. If the
+tuning in HAL-001 and HAL-003 is too broad, nothing will alert.
+
+![T1: credentialed scan completed, valid credentials on both servers](../images/phase6-t1-scan.webp)
