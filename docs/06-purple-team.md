@@ -63,6 +63,17 @@ administrator.
 
 ![T2: test account added to the local Administrators group](../images/phase6-t2-add.webp)
 
+Sentinel recorded it as event 4732 on WS01 at 14:09:16. Unlike the Domain
+Admins event in Phase 4, the **member's name is blank (`-`)**: local groups
+record only the account's SID (ending `-5101`). HAL-002 already maps the
+added account by SID rather than by name, so the incident still identifies
+it, but an analyst has to translate the SID to a name while triaging. My
+first check query also missed this event because it filtered on
+`TargetUserName`, which in group events is the *group*, the same trap noted
+in Phase 4.
+
+![T2: event 4732 with the member recorded only as a SID](../images/phase6-t2-check.webp)
+
 ## T3: Repeated wrong passwords, then the right one
 
 From 14:10 to 14:13 UTC, on WS01, I tried to start a program as
