@@ -254,6 +254,11 @@ look and no exclusions are needed.
 
 ![HAL-005 baseline: no results in 30 days](../images/phase4-hal005-baseline.webp)
 
+**Test:** on WS01 I created a harmless scheduled task (`HAL005-test`, which
+would only print text and was never run) with `schtasks.exe`, then deleted it.
+
+![Harmless scheduled task created on WS01](../images/phase4-hal005-test.webp)
+
 **Known gap** (for Phase 7): services or tasks created directly through the
 Windows API, with no command line, are not seen. Closing it needs Defender's
 `DeviceEvents` table or Windows audit events 4697/4698, neither of which is
