@@ -35,6 +35,7 @@ credentialed scan that raised zero alerts in Phase 3 now raises four.
 | T1 | 13:32–13:50 | ✅ HAL-001 ×2 (incidents 12, 14) and HAL-003 ×2 (15, 16), on both servers | ❌ No alert | **Detected by my rules only.** The watchlist did not suppress an unapproved scan |
 | T2 | 14:09 | ✅ HAL-002 (incident 18) | ❌ No alert | **Detected by my rule only.** Added account identified by SID |
 | T3 | 14:10–14:13 | ✅ HAL-004 (incident 19) | ❌ No alert | **Detected by my rule only.** No lockout policy, so nothing slowed the guessing |
+| T4 | 30 Oct, ~04:50–04:55 | (pending) | (pending) | Built-in discovery commands on WS01 |
 
 ## T1: Credentialed scan outside an approved window
 
@@ -189,3 +190,21 @@ machine and nothing ever ran.
 
 Incident 20 was then resolved as *Informational, expected activity –
 Security testing*, keeping its High severity.
+
+## T4: Discovery with built-in commands (gap test)
+
+After getting in, attackers look around with ordinary Windows commands that
+admins also use daily, so antivirus does not block them. None of the five
+HAL rules covers this. On WS01, as `haldaneadmin`, I ran:
+
+| ATT&CK | Purpose | Command |
+|---|---|---|
+| T1033 | Current user and groups | `whoami /all` |
+| T1087.002 | Domain user accounts | `net user /domain` |
+| T1069.002 | Domain Admins members | `net group "Domain Admins" /domain` |
+| T1018 | Domain controllers | `nltest /dclist:haldane.local` |
+| T1482 | Domain trusts | `nltest /domain_trusts` |
+| T1082 | System details | `systeminfo` |
+| T1016 | Network settings | `ipconfig /all` |
+
+![T4: discovery commands run on WS01](../images/phase6-t4-discovery.webp)
