@@ -61,3 +61,9 @@ HAL-004 raised **incident 25** and the playbook sent the approval request at
 17:08, about 19 minutes after the test, naming the incident and the account:
 
 ![Approval email for incident 25 (subscription details in the link redacted)](../images/phase5-approval-email.webp)
+
+I clicked **Approve**. About a minute later the account was disabled on DC01
+(`Enabled: False`), done by the playbook through Azure Run Command, not by
+hand:
+
+![hal-pb.test disabled by the playbook](../images/phase5-account-disabled.webp)
