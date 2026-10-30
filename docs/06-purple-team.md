@@ -158,3 +158,13 @@ the point of triage: the evidence (file paths, timing, my own download)
 shows what it actually was.
 
 ![Defender incident 20, raised by the Atomic Red Team download](../images/phase6-art-incident.webp)
+
+The evidence lists 11 files (attack-tool samples and test documents from the
+toolkit, such as `Out-Minidump.ps1`, `phant0m.exe` and `T1685.md`). Five show
+**Prevented**; six have no remediation status, matching "Remediation
+incomplete" in Windows Security on WS01: Defender blocked them but could not
+finish cleaning up while the installer still had the folder open.
+
+![Incident 20 evidence: 11 files, 5 prevented, 6 not yet remediated](../images/phase6-art-evidence.webp)
+
+![Windows Security protection history: remediation incomplete](../images/phase6-art-history.webp)
