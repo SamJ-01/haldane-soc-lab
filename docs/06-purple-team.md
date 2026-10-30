@@ -175,3 +175,17 @@ download folder, and all with **ActionSuccess: True**. Nothing outside the
 toolkit was involved.
 
 ![Every Defender detection path is inside the Atomic Red Team download folder](../images/phase6-art-detections.webp)
+
+I then deleted the toolkit folder (`Test-Path` returned `False`), ran a Defender
+quick scan, and listed every threat Defender had recorded. There were about
+60 threat names (PowerSploit, Meterpreter, ShellCode runners, a ransomware
+sample and others, all test samples from the toolkit), and **every one shows
+IsActive: False and DidThreatExecute: False**: nothing is still on the
+machine and nothing ever ran.
+
+![Folder removed; every threat inactive and never executed (1 of 2)](../images/phase6-art-clean-1.webp)
+
+![Every threat inactive and never executed (2 of 2)](../images/phase6-art-clean-2.webp)
+
+Incident 20 was then resolved as *Informational, expected activity –
+Security testing*, keeping its High severity.
