@@ -4,6 +4,12 @@
 > ATT&CK technique, to check which activity my rules (HAL-001 to HAL-005)
 > and Microsoft Defender detect, and which nothing detects.
 
+**Session 1 result:** all three tests were detected by the matching HAL
+rule, and **none** by Microsoft Defender's built-in detections. The same
+credentialed scan that raised zero alerts in Phase 3 now raises four.
+
+![Incident list after session 1: HAL-001, HAL-002, HAL-003 and HAL-004 incidents from the tests](../images/phase6-incidents.webp)
+
 ## Ground rules
 
 - Only my own lab (DC01, WS01, KALI01), only during a planned test window.
@@ -26,9 +32,9 @@
 
 | # | Start–end (UTC) | HAL rule | Defender | Outcome |
 |---|---|---|---|---|
-| T1 | 13:32–13:50 | (pending) | (pending) | Scan completed with valid credentials on both servers |
-| T2 | 14:09 | (pending) | (pending) | Test account added to WS01 local Administrators |
-| T3 | 14:10–14:13 | (pending) | (pending) | Repeated wrong passwords, then success |
+| T1 | 13:32–13:50 | ✅ HAL-001 ×2 (incidents 12, 14) and HAL-003 ×2 (15, 16), on both servers | ❌ No alert | **Detected by my rules only.** The watchlist did not suppress an unapproved scan |
+| T2 | 14:09 | ✅ HAL-002 (incident 18) | ❌ No alert | **Detected by my rule only.** Added account identified by SID |
+| T3 | 14:10–14:13 | ✅ HAL-004 (incident 19) | ❌ No alert | **Detected by my rule only.** No lockout policy, so nothing slowed the guessing |
 
 ## T1: Credentialed scan outside an approved window
 
