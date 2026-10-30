@@ -56,3 +56,8 @@ should make HAL-004 fire, which should start the playbook.
 ![Test account created](../images/phase5-test-account.webp)
 
 ![Repeated wrong passwords, then success](../images/phase5-password-test.webp)
+
+HAL-004 raised **incident 25** and the playbook sent the approval request at
+17:08, about 19 minutes after the test, naming the incident and the account:
+
+![Approval email for incident 25 (subscription details in the link redacted)](../images/phase5-approval-email.webp)
