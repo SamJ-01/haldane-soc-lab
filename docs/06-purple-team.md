@@ -284,6 +284,22 @@ page; the way to reverse it is **Undo** on the action in the Action center.
 
 ![Contain user action: scope haldane.local, automatically lifted after 5 days, Undo available](../images/phase6-contain-user-details.webp)
 
+Before undoing anything I checked the exact target of each action:
+
+| Action | SID | Account |
+|---|---|---|
+| 05:42, approval `febe4e` | `…-1015985207-500` | `haldaneadmin` (RID 500 is always the built-in administrator) |
+| 16:52, approval `500792` | `…-1015985207-6601` | `hal-pb.test` (a newly created account) |
+
+![05:42 action: SID ending -500, haldaneadmin, Contained](../images/phase6-contain-0542-account.webp)
+
+![16:52 action: SID ending -6601, hal-pb.test, Contained](../images/phase6-contain-1652-account.webp)
+
+**Undo on the 05:42 action failed**: "No active containment found for the
+specified user", although the account page still showed it as Contained.
+
+![Undo failed: no active containment found](../images/phase6-undo-error.webp)
+
 **Why it matters**
 
 - **My mistake:** running an attack toolkit as the lab's admin account made
