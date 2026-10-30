@@ -271,6 +271,11 @@ into one story:
 
 ![Action center history: Contain user, twice](../images/phase6-disruption-action-center.webp)
 
+The incident's assets confirmed it: **both `hal-pb.test` and `haldaneadmin`
+(Domain Admin) were Contained**.
+
+![haldaneadmin: CONTAINED, DOMAIN ADMIN](../images/phase6-haldaneadmin-contained.webp)
+
 **Why it matters**
 
 - **My mistake:** running an attack toolkit as the lab's admin account made
