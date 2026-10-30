@@ -167,7 +167,7 @@ resource playbook 'Microsoft.Logic/workflows@2019-05-01' = {
                 Subject: 'Haldane SOC: disable account @{variables(\'AccountName\')}?'
                 Options: 'Approve, Reject'
                 Importance: 'High'
-                Body: 'Incident @{triggerBody()?[\'object\']?[\'properties\']?[\'incidentNumber\']}: @{triggerBody()?[\'object\']?[\'properties\']?[\'title\']}\n\nAccount: @{variables(\'AccountName\')}\n\nApprove to disable this account in Active Directory on ${domainControllerName}. Reject to take no action.\n\nIncident: @{triggerBody()?[\'object\']?[\'properties\']?[\'incidentUrl\']}'
+                Body: 'Defender incident @{coalesce(triggerBody()?[\'object\']?[\'properties\']?[\'providerIncidentId\'], \'(not synced yet)\')} (Sentinel incident @{triggerBody()?[\'object\']?[\'properties\']?[\'incidentNumber\']}): @{triggerBody()?[\'object\']?[\'properties\']?[\'title\']}\n\nAccount: @{variables(\'AccountName\')}\n\nApprove to disable this account in Active Directory on ${domainControllerName}. Reject to take no action.\n\nIncident: @{triggerBody()?[\'object\']?[\'properties\']?[\'incidentUrl\']}'
               }
             }
           }

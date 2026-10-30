@@ -67,3 +67,9 @@ I clicked **Approve**. About a minute later the account was disabled on DC01
 hand:
 
 ![hal-pb.test disabled by the playbook](../images/phase5-account-disabled.webp)
+
+## Problems and fixes
+
+| Problem | Cause | Fix |
+|---|---|---|
+| The email said "Incident 25", but incident 25 in the Defender portal was a different incident (a HAL-001 RDP logon) | Sentinel and the Defender portal number incidents separately. The playbook quoted Sentinel's number; the portal shows Defender's | The email now shows both: the Defender incident ID (`providerIncidentId`) and the Sentinel number |
