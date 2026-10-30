@@ -34,3 +34,14 @@ tested it.
   from log data, which an attacker can influence (Phase 4 showed attacker
   text in the username field). It reaches PowerShell base64-encoded and is
   checked against a strict pattern before use.
+
+## Deployment
+
+`deploy-playbook.sh` created the Logic App, its two connections, the role
+assignments and the automation rule. The Outlook.com connection then had to
+be signed in once by hand (API connection > Edit API connection >
+Authorize), because a mailbox can't be signed in from code.
+
+The automation rule runs the playbook whenever HAL-004 creates an incident:
+
+![Automation rule: HAL-004 incident created, run playbook pb-hal-disable-account](../images/phase5-automation-rule.webp)
