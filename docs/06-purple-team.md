@@ -80,6 +80,11 @@ in Phase 4.
 
 ![T2: event 4732 with the member recorded only as a SID](../images/phase6-t2-check.webp)
 
+HAL-002 raised incident 18, linking WS01 and two accounts (the account added,
+by SID, and `haldaneadmin`, who added it). Resolved as security testing.
+
+![T2: HAL-002 incident 18](../images/phase6-t2-incident.webp)
+
 ## T3: Repeated wrong passwords, then the right one
 
 From 14:10 to 14:13 UTC, on WS01, I tried to start a program as
@@ -96,6 +101,13 @@ on WS01** between 14:10:31 and 14:12:07, then a **successful logon (4624) at
 14:12:46**.
 
 ![T3: 12 failures then a success for the test account](../images/phase6-t3-check.webp)
+
+HAL-004 raised incident 19 for `hal-pt.test` on WS01. One thing to tune: the
+IP entity is `::1` (the computer talking to itself), because `runas` signs in
+locally. A local source address tells an analyst nothing, so in Phase 7 the
+rule should map the IP only when it is a real remote address.
+
+![T3: HAL-004 incident 19, with the IP entity shown as ::1](../images/phase6-t3-incident.webp)
 
 ## Clean-up, checked from the logs
 
