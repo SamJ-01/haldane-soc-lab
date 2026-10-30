@@ -168,3 +168,10 @@ finish cleaning up while the installer still had the folder open.
 ![Incident 20 evidence: 11 files, 5 prevented, 6 not yet remediated](../images/phase6-art-evidence.webp)
 
 ![Windows Security protection history: remediation incomplete](../images/phase6-art-history.webp)
+
+On WS01, `Get-MpThreatDetection` listed every detection with its full path:
+all under `C:\AtomicRedTeam\tmp\atomic-red-team-master\atomics\`, the
+download folder, and all with **ActionSuccess: True**. Nothing outside the
+toolkit was involved.
+
+![Every Defender detection path is inside the Atomic Red Team download folder](../images/phase6-art-detections.webp)
