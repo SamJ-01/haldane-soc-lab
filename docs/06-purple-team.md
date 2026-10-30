@@ -35,7 +35,7 @@ credentialed scan that raised zero alerts in Phase 3 now raises four.
 | T1 | 13:32–13:50 | ✅ HAL-001 ×2 (incidents 12, 14) and HAL-003 ×2 (15, 16), on both servers | ❌ No alert | **Detected by my rules only.** The watchlist did not suppress an unapproved scan |
 | T2 | 14:09 | ✅ HAL-002 (incident 18) | ❌ No alert | **Detected by my rule only.** Added account identified by SID |
 | T3 | 14:10–14:13 | ✅ HAL-004 (incident 19) | ❌ No alert | **Detected by my rule only.** No lockout policy, so nothing slowed the guessing |
-| T4 | 30 Oct, ~04:50–04:55 | (pending) | (pending) | Built-in discovery commands on WS01 |
+| T4 | 30 Oct, 04:54:07–04:54:57 | (pending) | (pending) | All 9 processes recorded by both Defender and Sysmon |
 
 ## T1: Credentialed scan outside an approved window
 
@@ -208,3 +208,10 @@ HAL rules covers this. On WS01, as `haldaneadmin`, I ran:
 | T1016 | Network settings | `ipconfig /all` |
 
 ![T4: discovery commands run on WS01](../images/phase6-t4-discovery.webp)
+
+Both data sources recorded every process: the 7 commands plus the 2 `net1.exe`
+helpers that `net` starts behind the scenes, 18 rows in all (9 from
+Defender, 9 from Sysmon), between 04:54:07 and 04:54:57 UTC. Unlike the
+HAL-005 test in Phase 4, Defender missed nothing this time.
+
+![T4: every discovery command recorded by both Defender and Sysmon](../images/phase6-t4-recorded.webp)
