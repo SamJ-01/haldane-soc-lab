@@ -1,8 +1,8 @@
 # Phase 5: Response automation
 
-> **In progress.** An approval-gated playbook: when HAL-004 (many failed
-> logons followed by a success) fires, Sentinel asks a human by email whether
-> to disable the account, and only acts on **Approve**.
+> **Done.** An approval-gated playbook: when HAL-004 (many failed logons
+> followed by a success) fires, Sentinel asks a human by email whether to
+> disable the account, and only acts on **Approve**. Tested end to end.
 
 ## Design
 
@@ -68,8 +68,38 @@ hand:
 
 ![hal-pb.test disabled by the playbook](../images/phase5-account-disabled.webp)
 
+The playbook then wrote the outcome back to the incident as a comment, with
+the Run Command result (**Succeeded**). The playbook had waited for the
+approval and only acted once it arrived:
+
+![Playbook comment on the incident: analyst approved, Run Command succeeded](../images/phase5-incident-comment.webp)
+
+### End-to-end result
+
+| Step | Evidence | Result |
+|---|---|---|
+| HAL-004 fires on the test | Incident created ~19 minutes after the test | ✅ |
+| Automation rule starts the playbook | Approval email at 17:08 | ✅ |
+| Human approves | Approve clicked | ✅ |
+| Account disabled on DC01 | `Enabled: False` | ✅ |
+| Outcome recorded on the incident | Playbook comment, Run Command Succeeded | ✅ |
+
+### What I'd point out about this design
+
+- **It never acts on its own.** In the same test, Defender's own attack
+  disruption *also* contained the test account, automatically, 20 minutes
+  before my playbook asked for approval (see
+  [Phase 6](06-purple-team.md#defenders-automatic-attack-disruption-contained-accounts)).
+  Both approaches are valid: automatic containment is fast; approval-gated
+  action is safer for anything that could lock out real users. A real team
+  would decide which actions run automatically and which need a human, and
+  make sure the two don't fight over the same account.
+- **Least privilege for automation.** The playbook can comment on incidents
+  and run commands on one VM. It has no password and no wider rights.
+
 ## Problems and fixes
 
 | Problem | Cause | Fix |
 |---|---|---|
+| The incident comment showed the raw Run Command JSON | The comment printed the whole response body | The comment now shows just the command's output message (falls back to the raw body if that's missing) |
 | The email said "Incident 25", but incident 25 in the Defender portal was a different incident (a HAL-001 RDP logon) | Sentinel and the Defender portal number incidents separately. The playbook quoted Sentinel's number; the portal shows Defender's | The email now shows both: the Defender incident ID (`providerIncidentId`) and the Sentinel number |

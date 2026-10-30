@@ -229,7 +229,7 @@ resource playbook 'Microsoft.Logic/workflows@2019-05-01' = {
                 path: '/Incidents/Comment'
                 body: {
                   incidentArmId: '@triggerBody()?[\'object\']?[\'id\']'
-                  message: '<p>Playbook pb-hal-disable-account: analyst <b>approved</b> disabling <b>@{variables(\'AccountName\')}</b> on ${domainControllerName}.</p><p>Run Command result (@{actions(\'Disable_account_on_DC\')?[\'status\']}):</p><pre>@{body(\'Disable_account_on_DC\')}</pre>'
+                  message: '<p>Playbook pb-hal-disable-account: analyst <b>approved</b> disabling <b>@{variables(\'AccountName\')}</b> on ${domainControllerName}.</p><p>Run Command result (@{actions(\'Disable_account_on_DC\')?[\'status\']}):</p><pre>@{coalesce(body(\'Disable_account_on_DC\')?[\'value\']?[0]?[\'message\'], string(body(\'Disable_account_on_DC\')))}</pre>'
                 }
               }
             }
