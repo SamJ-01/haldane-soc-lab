@@ -247,3 +247,40 @@ Defender, 9 from Sysmon), between 04:54:07 and 04:54:57 UTC. Unlike the
 HAL-005 test in Phase 4, Defender missed nothing this time.
 
 ![T4: every discovery command recorded by both Defender and Sysmon](../images/phase6-t4-recorded.webp)
+
+## Defender's automatic attack disruption contained accounts
+
+Later that day Defender raised **incident 23, "Hands-on keyboard attack was
+launched from a compromised account (attack disruption)"**: High, priority
+score 100, 10 alerts across WS01 and DC01. It had joined the day's activity
+into one story:
+
+| Time (30 Oct) | What Defender saw | What actually happened |
+|---|---|---|
+| 04:24–04:34 | PowerSploit tool; compromised account conducting hands-on-keyboard attack; potential human-operated malicious activity | I downloaded the Atomic Red Team toolkit on WS01 **while signed in as `haldaneadmin`** |
+| 05:42 | **Contain user** (automatic, by Attack Disruption) on the `haldaneadmin` account's SID | Defender's response to the above |
+| 16:48–16:52 | Lateral movement on RPC blocked; user created by a compromised account; user's password changed by a compromised account | I created `hal-pb.test` on DC01 as `haldaneadmin` for the Phase 5 test |
+| 16:52 | **Contain user** on `hal-pb.test` | Defender's response, about 20 minutes **before** my own playbook disabled the same account |
+| 16:59 | Lateral movement using RDP blocked | My RDP sign-in as `haldaneadmin` |
+
+![Incident 23 alerts](../images/phase6-disruption-alerts.webp)
+
+![Incident 23 evidence (my IP redacted)](../images/phase6-disruption-evidence.webp)
+
+![Incident 23 activities: two automatic Contain user actions](../images/phase6-disruption-activities.webp)
+
+![Action center history: Contain user, twice](../images/phase6-disruption-action-center.webp)
+
+**Why it matters**
+
+- **My mistake:** running an attack toolkit as the lab's admin account made
+  Defender treat the admin account as the attacker, and from then on every
+  ordinary admin task done with it looked malicious. Tests should run as a
+  separate, disposable account.
+- **Defender acted on its own.** Automatic attack disruption contained two
+  accounts without asking. That is valuable against a real attacker, but it
+  is also why a security team must know which automatic actions are switched
+  on: one of the accounts it contained was the only admin.
+- **Two automations acted on the same account.** Defender contained
+  `hal-pb.test` and, 20 minutes later, my Phase 5 playbook disabled it.
+  Neither knew about the other.
