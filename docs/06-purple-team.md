@@ -128,3 +128,21 @@ have been done, not just the one you expected.
 ![Clean-up check: scan account disabled and test account removed from Administrators](../images/phase6-cleanup-check.webp)
 
 ![The test account was deleted (4726)](../images/phase6-cleanup-deleted.webp)
+
+## Session 2: Atomic Red Team blocked by Defender
+
+The plan for session 2 was to run tests from **Atomic Red Team**, an
+open-source library of small tests mapped to ATT&CK techniques, on WS01.
+Defender stopped it at download (30 Oct, 04:34–04:38 UTC): "Threats found",
+the test library could not be moved into place, and the framework did not
+load. The files Defender wanted to check include the test definitions for
+T1059.001, T1558.003, T1557.001 and T1685.
+
+![Atomic Red Team install blocked: access denied, module not loaded, Defender "Threats found"](../images/phase6-art-blocked-install.webp)
+
+![Defender asking to check Atomic Red Team test files (sample submission declined)](../images/phase6-art-sample-submission.webp)
+
+Per the ground rules I did **not** add a Defender exclusion to get it
+through. Result: **prevented** by Defender's antivirus. The rule-based tests
+for HAL-003 and HAL-005 had already been done directly in Phase 4, so no
+coverage is lost.
