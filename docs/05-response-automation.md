@@ -45,3 +45,14 @@ Authorize), because a mailbox can't be signed in from code.
 The automation rule runs the playbook whenever HAL-004 creates an incident:
 
 ![Automation rule: HAL-004 incident created, run playbook pb-hal-disable-account](../images/phase5-automation-rule.webp)
+
+## Test
+
+On 30 Oct I created a fresh test account, `hal-pb.test`, on DC01, then on
+WS01 entered a wrong password for it 12 times followed by the right one
+(finishing at about 16:49 UTC), the same pattern as Phase 6's T3. This
+should make HAL-004 fire, which should start the playbook.
+
+![Test account created](../images/phase5-test-account.webp)
+
+![Repeated wrong passwords, then success](../images/phase5-password-test.webp)
