@@ -1,8 +1,39 @@
 # Phase 6: Purple-team exercise
 
-> **In progress.** Controlled tests in my own lab, each mapped to a MITRE
-> ATT&CK technique, to check which activity my rules (HAL-001 to HAL-005)
-> and Microsoft Defender detect, and which nothing detects.
+> **Done.** Controlled tests in my own lab, each mapped to a MITRE ATT&CK
+> technique, to check which activity my rules (HAL-001 to HAL-005) and
+> Microsoft Defender detect, and which nothing detects.
+
+## Summary
+
+| What was tested | My rules | Defender built-in | Verdict |
+|---|---|---|---|
+| Scan account used outside an approved window (T1078, T1059.001) | ✅ HAL-001, HAL-003 | ❌ | Detected |
+| Account added to local Administrators (T1098) | ✅ HAL-002 | ❌ | Detected |
+| Password guessing then success (T1110.001) | ✅ HAL-004 | ❌ | Detected |
+| Attack-testing toolkit downloaded (Atomic Red Team) | n/a | ✅ Blocked | Prevented |
+| Discovery with built-in commands (T1033, T1087.002, T1069.002, T1018, T1482, T1082, T1016) | ❌ | ❌ | **Gap** |
+
+**Findings carried to Phase 7**
+
+1. **Discovery is invisible.** Nine discovery commands in under a minute
+   were fully recorded by Defender and Sysmon, and nothing alerted. A rule
+   for several discovery commands from one account in a short time would
+   close this.
+2. **No account lockout policy** (threshold: Never). Detection (HAL-004) is
+   the only control against password guessing.
+3. **HAL-004 shows `::1` as the IP** for local logons; map the IP only when
+   it is a real remote address.
+4. **HAL-002 identifies local-group additions by SID only**; resolving the
+   SID to a name would speed up triage.
+5. **My rules and Defender complement each other.** Defender caught none of
+   the account-based tests, which are activities an admin could legitimately
+   do; my rules caught none of the malware, which Defender blocked outright.
+
+**Process lessons:** check that data is really arriving before trusting an
+empty result; verify clean-up from the logs (and look for every way a step
+could have been done: the test account was deleted, not disabled); confirm
+unexpected IPs and accounts from evidence before closing an incident.
 
 **Session 1 result:** all three tests were detected by the matching HAL
 rule, and **none** by Microsoft Defender's built-in detections. The same
@@ -35,7 +66,8 @@ credentialed scan that raised zero alerts in Phase 3 now raises four.
 | T1 | 13:32–13:50 | ✅ HAL-001 ×2 (incidents 12, 14) and HAL-003 ×2 (15, 16), on both servers | ❌ No alert | **Detected by my rules only.** The watchlist did not suppress an unapproved scan |
 | T2 | 14:09 | ✅ HAL-002 (incident 18) | ❌ No alert | **Detected by my rule only.** Added account identified by SID |
 | T3 | 14:10–14:13 | ✅ HAL-004 (incident 19) | ❌ No alert | **Detected by my rule only.** No lockout policy, so nothing slowed the guessing |
-| T4 | 30 Oct, 04:54:07–04:54:57 | (pending) | (pending) | All 9 processes recorded by both Defender and Sysmon |
+| T4 | 30 Oct, 04:54:07–04:54:57 | ❌ No rule | ❌ No alert | **Gap.** All 9 processes recorded by both Defender and Sysmon, but nothing alerts on them |
+| Toolkit | 30 Oct, 04:34–04:38 | n/a | ✅ Blocked; incident 20 (High, "Ransomware") | **Prevented by Defender.** Nothing executed |
 
 ## T1: Credentialed scan outside an approved window
 
