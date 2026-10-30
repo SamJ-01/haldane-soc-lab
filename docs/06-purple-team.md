@@ -146,3 +146,15 @@ Per the ground rules I did **not** add a Defender exclusion to get it
 through. Result: **prevented** by Defender's antivirus. The rule-based tests
 for HAL-003 and HAL-005 had already been done directly in Phase 4, so no
 coverage is lost.
+
+Defender also raised its **own** incident, the first of the exercise not
+produced by a HAL rule: **incident 20, "Multiple threat families detected
+including Ransomware on one endpoint"** (High, tagged Ransomware), with 8
+alerts and 11 files on WS01, among them "PowerSploit post-exploitation tool",
+"'Amsipat' malware was prevented" and "Ransomware-linked threat actor
+detected". All 11 files came from the Atomic Red Team download, which
+contains real attack examples for testing. The title is alarming, which is
+the point of triage: the evidence (file paths, timing, my own download)
+shows what it actually was.
+
+![Defender incident 20, raised by the Atomic Red Team download](../images/phase6-art-incident.webp)
