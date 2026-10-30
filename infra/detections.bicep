@@ -107,7 +107,7 @@ resource hal002 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
     enabled: true
     query: loadTextContent('../detections/HAL-002-member-added-to-privileged-group.kql')
     queryFrequency: 'PT1H'
-    queryPeriod: 'PT1H'
+    queryPeriod: 'P14D'
     triggerOperator: 'GreaterThan'
     triggerThreshold: 0
     suppressionEnabled: false
@@ -367,6 +367,76 @@ resource hal005 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
           {
             identifier: 'CommandLine'
             columnName: 'CommandLine'
+          }
+        ]
+      }
+    ]
+    incidentConfiguration: {
+      createIncident: true
+      groupingConfiguration: {
+        enabled: true
+        reopenClosedIncident: false
+        lookbackDuration: 'PT5H'
+        matchingMethod: 'AllEntities'
+      }
+    }
+  }
+}
+
+resource hal006 'Microsoft.SecurityInsights/alertRules@2024-03-01' = {
+  scope: workspace
+  dependsOn: [
+    scanWindows
+  ]
+  name: guid(workspace.id, 'HAL-006')
+  kind: 'Scheduled'
+  properties: {
+    displayName: 'HAL-006 Burst of discovery commands from one account'
+    description: 'Four or more different discovery tools (whoami, net, nltest, systeminfo, ipconfig and similar) run by one account on one machine within 10 minutes, seen by Defender for Endpoint or Sysmon. Typical of an intruder looking around after getting in.'
+    severity: 'Medium'
+    enabled: true
+    query: loadTextContent('../detections/HAL-006-discovery-command-burst.kql')
+    queryFrequency: 'PT1H'
+    queryPeriod: 'PT2H'
+    triggerOperator: 'GreaterThan'
+    triggerThreshold: 0
+    suppressionEnabled: false
+    suppressionDuration: 'PT1H'
+    tactics: [
+      'Discovery'
+    ]
+    techniques: [
+      'T1033'
+      'T1087'
+      'T1069'
+      'T1018'
+      'T1482'
+      'T1082'
+      'T1016'
+    ]
+    eventGroupingSettings: {
+      aggregationKind: 'AlertPerResult'
+    }
+    entityMappings: [
+      {
+        entityType: 'Host'
+        fieldMappings: [
+          {
+            identifier: 'FullName'
+            columnName: 'Host'
+          }
+        ]
+      }
+      {
+        entityType: 'Account'
+        fieldMappings: [
+          {
+            identifier: 'Name'
+            columnName: 'Account'
+          }
+          {
+            identifier: 'NTDomain'
+            columnName: 'AccountDomain'
           }
         ]
       }

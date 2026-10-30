@@ -1,0 +1,79 @@
+// HAL-006: Burst of discovery commands from one account
+//
+// Why: Phase 6 test T4 ran nine discovery commands on WS01 in under a minute
+// (whoami, net user /domain, net group "Domain Admins" /domain, nltest,
+// systeminfo, ipconfig). Defender and Sysmon recorded every one and nothing
+// alerted. Each command is normal on its own; several different ones from
+// the same account within minutes is what an intruder does to look around.
+// MITRE ATT&CK (Discovery): T1033, T1087.002, T1069.002, T1018, T1482,
+//               T1082, T1016, T1049, T1057
+// Data: DeviceProcessEvents (Defender for Endpoint) + Sysmon event 1, combined
+//       and de-duplicated as in HAL-005.
+// Severity: Medium
+//
+// Threshold: 4 or more DIFFERENT discovery tools from one account on one
+// machine within 10 minutes (T4 used 5). The approved vulnerability scanner
+// is ignored only during approved scan windows (same watchlist as HAL-001).
+//
+// Ingestion delay: looks back 2 hours of event time, alerts only on bursts
+// that include events which arrived in the last hour. When running by hand,
+// remove both ingestion_time() lines and widen Lookback.
+//
+// Known limit: a burst that straddles a 10-minute boundary is split in two
+// and may fall under the threshold; an attacker who spreads commands over
+// hours will not trigger it.
+
+let Lookback = 2h;
+let MinDistinctTools = 4;
+let Tools = dynamic(["whoami.exe", "net.exe", "net1.exe", "nltest.exe", "systeminfo.exe",
+                     "ipconfig.exe", "arp.exe", "route.exe", "netstat.exe", "tasklist.exe",
+                     "quser.exe", "qwinsta.exe", "dsquery.exe", "nslookup.exe"]);
+let ScanWindows = _GetWatchlist('ApprovedScanWindows')
+    | project Account  = tolower(tostring(column_ifexists("Account", ""))),
+              StartUtc = todatetime(column_ifexists("StartUtc", "")),
+              EndUtc   = todatetime(column_ifexists("EndUtc", ""));
+let FromDefender = DeviceProcessEvents
+    | where TimeGenerated > ago(Lookback)
+    | where ingestion_time() > ago(1h)
+    | where FileName in~ (Tools)
+    | project TimeGenerated, Host = tolower(DeviceName), ProcessId = tolong(ProcessId),
+              FileName = tolower(FileName), CommandLine = ProcessCommandLine,
+              Account = tolower(AccountName), AccountDomain = tolower(AccountDomain);
+let FromSysmon = Event
+    | where TimeGenerated > ago(Lookback)
+    | where ingestion_time() > ago(1h)
+    | where Source == "Microsoft-Windows-Sysmon" and EventID == 1
+    | where EventData has_any (Tools)
+    | extend Data = parse_xml(EventData).DataItem.EventData.Data
+    | mv-apply Data on (
+        summarize Fields = make_bag(bag_pack(tostring(Data["@Name"]), tostring(Data["#text"]))))
+    | extend User = tostring(Fields.User)
+    | project TimeGenerated, Host = tolower(Computer), ProcessId = tolong(Fields.ProcessId),
+              FileName = tolower(extract(@"[^\\]+$", 0, tostring(Fields.Image))),
+              CommandLine = tostring(Fields.CommandLine),
+              Account = tolower(extract(@"[^\\]+$", 0, User)),
+              AccountDomain = tolower(extract(@"^([^\\]+)\\", 1, User));
+let Events = union FromDefender, FromSysmon
+    | where FileName in~ (Tools)
+    | where Account !in ("system", "local service", "network service", "")
+    // net.exe starts net1.exe for the same command: count them as one tool.
+    | extend Tool = iff(FileName == "net1.exe", "net.exe", FileName)
+    // Same process seen by both sources: keep one row.
+    | summarize TimeGenerated = min(TimeGenerated), CommandLine = take_any(CommandLine),
+                AccountDomain = take_any(AccountDomain)
+        by Host, ProcessId, Tool, Account, Bin5 = bin(TimeGenerated, 5m);
+let ApprovedScanEvents = Events
+    | join kind=inner ScanWindows on Account
+    | where TimeGenerated between (StartUtc .. EndUtc)
+    | distinct Host, ProcessId, Bin5;
+Events
+| join kind=leftanti ApprovedScanEvents on Host, ProcessId, Bin5
+| summarize DistinctTools = dcount(Tool), Tools = make_set(Tool, 20),
+            Commands = make_set(CommandLine, 20),
+            FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+            AccountDomain = take_any(AccountDomain)
+    by Host, Account, Window = bin(TimeGenerated, 10m)
+| where DistinctTools >= MinDistinctTools
+| project FirstSeen, LastSeen, Host, Account, AccountDomain, DistinctTools,
+          Tools = tostring(Tools), Commands = tostring(Commands)
+| order by FirstSeen desc

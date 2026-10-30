@@ -13,15 +13,31 @@
 // Note: in these events TargetUserName is the GROUP, MemberName is the account
 // that was added, and SubjectUserName is who made the change.
 // Severity: High
+//
+// Phase 7 tuning: local-group events (4732) record the added account only as
+// a SID (MemberName is "-"), which slowed triage in Phase 6. The rule now
+// looks the SID up in recent account-created (4720) and logon (4624) events
+// and shows the name. To have 14 days of events to look in, the rule's query
+// period is 14 days, but it only alerts on events that arrived in the last
+// hour (ingestion_time()). When running by hand, remove that line.
 
 let PrivilegedGroups = dynamic(["Domain Admins", "Administrators", "Enterprise Admins", "Schema Admins"]);
+let SidNames = union
+        (SecurityEvent | where EventID == 4720
+            | project Sid = TargetSid, Name = TargetUserName, Domain = TargetDomainName, TimeGenerated),
+        (SecurityEvent | where EventID == 4624 and TargetUserSid startswith "S-1-5-21-"
+            | project Sid = TargetUserSid, Name = TargetUserName, Domain = TargetDomainName, TimeGenerated)
+    | where isnotempty(Sid) and isnotempty(Name) and Name != "-"
+    | summarize arg_max(TimeGenerated, Name, Domain) by Sid
+    | project MemberSid = Sid, ResolvedName = strcat(Domain, "\\", Name);
 SecurityEvent
-| where TimeGenerated > ago(1d)
+| where ingestion_time() > ago(1h)
 | where EventID in (4728, 4732, 4756)
 | where TargetUserName in~ (PrivilegedGroups)
+| join kind=leftouter SidNames on MemberSid
 | project TimeGenerated, Computer, EventID,
           Group = TargetUserName,
-          Member = MemberName,
+          Member = iff(isempty(MemberName) or MemberName == "-", coalesce(ResolvedName, MemberSid), MemberName),
           MemberSid,
           AddedBy = SubjectUserName,
           AddedByDomain = SubjectDomainName

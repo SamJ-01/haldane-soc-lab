@@ -11,7 +11,9 @@
 //          3 network, 10 RDP)
 // Severity: High
 //
-// Threshold: 10 failures. The 30-day baseline (see docs/04) sets this.
+// Threshold: 5 failures (was 10). The 30-day baseline never saw more than 1
+// failure per account per hour, and Phase 7 adds an account lockout after 10
+// failures, so the rule must fire before the lockout does.
 // Machine accounts (ending in $) are ignored.
 //
 // Ingestion delay: the rule looks back 2 hours so a burst that straddles two
@@ -23,7 +25,7 @@
 // 4771, not 4625; password spraying (few attempts against many accounts)
 // stays under a per-account threshold.
 
-let FailureThreshold = 10;
+let FailureThreshold = 5;
 let Failures = SecurityEvent
     | where TimeGenerated > ago(2h)
     | where EventID == 4625
@@ -50,6 +52,10 @@ Failures
 | summarize arg_min(SuccessTime, SuccessIP, LogonType)
     by Account, Computer, FailedAttempts, FirstFailure, LastFailure,
        FailureIPs = tostring(FailureIPs)
+// Phase 6 showed "::1" as the IP for a local sign-in, which tells an analyst
+// nothing. Keep the IP only when it is a real remote address; an empty value
+// means Sentinel simply leaves the IP entity out.
+| extend SuccessIP = iff(isempty(SuccessIP) or SuccessIP in ("-", "::1", "127.0.0.1"), "", SuccessIP)
 | project Account, Computer, FailedAttempts, FirstFailure, LastFailure,
           FailureIPs, FirstSuccess = SuccessTime, SuccessIP, LogonType
 | order by FailedAttempts desc
