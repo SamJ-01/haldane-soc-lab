@@ -300,6 +300,20 @@ specified user", although the account page still showed it as Contained.
 
 ![Undo failed: no active containment found](../images/phase6-undo-error.webp)
 
+Undo on the 16:52 action (`hal-pb.test`) was accepted. That account had
+already been disabled by my Phase 5 playbook and was deleted straight
+afterwards, so releasing it changed nothing in practice.
+
+![Undo accepted for the hal-pb.test containment](../images/phase6-undo-hal-pb.webp)
+
+**Testing what was actually true:** I then signed in to WS01 over RDP as
+`haldaneadmin`, and it worked (an earlier attempt had failed with error
+0x204, which turned out to be my just-in-time access window expiring, a
+network block rather than containment). So whatever the account page said,
+the containment on `haldaneadmin` was no longer being enforced; in any case
+it would have lifted automatically on 4 Nov at 05:42. **Lesson: when the
+portal's views disagree, test the real effect.**
+
 **Why it matters**
 
 - **My mistake:** running an attack toolkit as the lab's admin account made
