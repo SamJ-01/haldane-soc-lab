@@ -116,12 +116,15 @@ Rather than rely on memory, I checked the clean-up in Sentinel:
 | Step | Event | Result |
 |---|---|---|
 | Scan account disabled after T1 | 4725 on DC01, `svc-nessus` | ✅ 14:22 |
+| Test account `hal-pt.test` deleted | 4726 on DC01, by `haldaneadmin` | ✅ 14:22 |
 | Test account removed from WS01 Administrators | 4733 on WS01, SID ending -5101 | ✅ 14:23 |
-| Test account `hal-pt.test` disabled | 4725 on DC01, `hal-pt.test` | ❌ **No event: not done** |
 
-I thought the test account had been disabled; the logs showed it had not.
-The lab was shut down, so the account could not be used, and it was the
-first task of the next session. A small example of why clean-up is
-verified, not assumed.
+My first check looked only for 4725 (account **disabled**), found nothing for
+the test account and wrongly concluded the clean-up had not been done. The
+account had in fact been **deleted**, which is a different event (4726).
+Lesson: when checking that something was done, look for every way it could
+have been done, not just the one you expected.
 
-![Clean-up check: scan account disabled and test account removed from Administrators, but no disable event for the test account](../images/phase6-cleanup-check.webp)
+![Clean-up check: scan account disabled and test account removed from Administrators](../images/phase6-cleanup-check.webp)
+
+![The test account was deleted (4726)](../images/phase6-cleanup-deleted.webp)
