@@ -276,6 +276,14 @@ The incident's assets confirmed it: **both `hal-pb.test` and `haldaneadmin`
 
 ![haldaneadmin: CONTAINED, DOMAIN ADMIN](../images/phase6-haldaneadmin-contained.webp)
 
+The action's details explain what containment does: it blocks remote
+activity by the account over common lateral-movement protocols (RDP, SMB,
+RPC) on every protected device in `haldane.local`, and lifts itself
+automatically after **5 days**. There was no release option on the user's
+page; the way to reverse it is **Undo** on the action in the Action center.
+
+![Contain user action: scope haldane.local, automatically lifted after 5 days, Undo available](../images/phase6-contain-user-details.webp)
+
 **Why it matters**
 
 - **My mistake:** running an attack toolkit as the lab's admin account made
