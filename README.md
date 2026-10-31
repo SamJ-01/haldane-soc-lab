@@ -13,6 +13,9 @@ All systems are lab machines I own. No real company or user data is involved.
 
 **Start with the [final report](docs/08-report.md).**
 
+> **Status:** complete. The lab ran from 4 to 31 Oct 2026 and was torn down on
+> 31 Oct 2026 (`teardown.sh`). Everything can be rebuilt from the code below.
+
 ## Results at a glance
 
 | | |
