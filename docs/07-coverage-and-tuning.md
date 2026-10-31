@@ -58,3 +58,18 @@ an approved window, so HAL-001 and HAL-003 alerted on it too. Inside an
 approved window the watchlist suppresses it.
 
 ![HAL-006 run over 3 days: the T4 test and the unapproved scan](../images/phase7-hal006-validation.webp)
+
+**Does the scan-window exclusion work for HAL-006?** Over 30 days the query
+returned the same three rows, with nothing from the approved Phase 3 scans
+(8 and 15 Oct). An empty result proves nothing unless the data was there, so
+I ran a control: the same query with the exclusion line removed.
+
+![30 days with the exclusion: the same three rows](../images/phase7-hal006-30d.webp)
+
+Without the exclusion, **three more `svc-nessus` rows appeared**: 15 Oct
+09:42–09:49 on WS01 and DC01, and 8 Oct 05:23–05:28 on WS01, each inside its
+approved window (15 Oct 09:35–10:10, 8 Oct 04:55–06:00). So the approved
+scans *do* trigger HAL-006, and the watchlist is what suppresses them, while
+the unapproved scan on 29 Oct still alerts.
+
+![Control without the exclusion: the approved Phase 3 scans appear](../images/phase7-hal006-control.webp)
