@@ -99,7 +99,12 @@ approval and only acted once it arrived:
 
 ## Problems and fixes
 
+Both fixes below are in [`infra/playbook.bicep`](../infra/playbook.bicep) but
+were **not redeployed or retested** before the lab was torn down: a fair test
+needs a fresh HAL-004 run, which wasn't worth the VM time. The run documented
+above used the earlier version.
+
 | Problem | Cause | Fix |
 |---|---|---|
-| The incident comment showed the raw Run Command JSON | The comment printed the whole response body | The comment now shows just the command's output message (falls back to the raw body if that's missing) |
-| The email said "Incident 25", but incident 25 in the Defender portal was a different incident (a HAL-001 RDP logon) | Sentinel and the Defender portal number incidents separately. The playbook quoted Sentinel's number; the portal shows Defender's | The email now shows both: the Defender incident ID (`providerIncidentId`) and the Sentinel number |
+| The incident comment showed the raw Run Command JSON | The comment printed the whole response body | Changed in code (not yet deployed or retested): the comment shows just the command's output message (falls back to the raw body if that's missing) |
+| The email said "Incident 25", but incident 25 in the Defender portal was a different incident (a HAL-001 RDP logon) | Sentinel and the Defender portal number incidents separately. The playbook quoted Sentinel's number; the portal shows Defender's | Changed in code (not yet deployed or retested): the email shows both the Defender incident ID (`providerIncidentId`) and the Sentinel number |

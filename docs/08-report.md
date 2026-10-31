@@ -123,6 +123,7 @@ In priority order, for a real organisation in Haldane's position.
 | R5 | Collect service and task creation events (4697/4698) so persistence through the Windows API is seen, not just command lines | Gap | Low |
 | R6 | Add network egress logs (NSG flow logs or a firewall) to see command and control and data leaving | Gap | Medium–High (cost) |
 | R7 | Safely test credential dumping (LSASS access) and write a rule for it | Gap | Medium |
+| R8 | Deploy and retest the two playbook fixes (both incident numbers in the email; clean output in the comment), which are in code but were not redeployed | Phase 5 | Low |
 
 ## 6. Lessons learned
 

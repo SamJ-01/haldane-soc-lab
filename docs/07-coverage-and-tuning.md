@@ -38,7 +38,7 @@
 | **HAL-004** | Threshold 10 → **5** failures | Baseline never above 1 per hour; the new lockout policy locks at 10, so the rule must fire first |
 | **HAL-004** | IP shown only when it is a real remote address | Phase 6 T3 incident showed `::1` (local) as the IP |
 | **HAL-002** | Added account's SID resolved to a name from recent 4720/4624 events; query period 14 days, alerting only on newly arrived events | Phase 6 T2: local-group events record only the SID |
-| **Playbook** | Email shows Defender and Sentinel incident numbers; comment shows command output, not raw JSON | Phase 5 testing |
+| **Playbook** | Email shows Defender and Sentinel incident numbers; comment shows command output, not raw JSON. *In code only: not redeployed or retested* | Phase 5 testing |
 
 All rule changes were written with AI assistance and validated by me
 against data already in Sentinel before deploying.
