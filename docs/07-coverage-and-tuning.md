@@ -40,3 +40,20 @@
 
 All rule changes were written with AI assistance and validated by me
 against data already in Sentinel before deploying.
+
+## Validating HAL-006 before deploying
+
+Run by hand over the previous 3 days, HAL-006 found three bursts and nothing
+else:
+
+| When | Host | Account | Tools | Verdict |
+|---|---|---|---|---|
+| 30 Oct 04:54 | WS01 | `haldaneadmin` | whoami, net, nltest, systeminfo, ipconfig | ✅ Phase 6 T4, the gap it was written for |
+| 29 Oct 13:32–13:39 | WS01 | `svc-nessus` | netstat, tasklist, ipconfig, net, arp | ✅ Phase 6 T1: the **unapproved** credentialed scan, which Nessus runs partly as Windows commands |
+| 29 Oct 13:32–13:39 | DC01 | `svc-nessus` | the same | ✅ as above |
+
+The scanner rows are correct alerts: that scan was deliberately run outside
+an approved window, so HAL-001 and HAL-003 alerted on it too. Inside an
+approved window the watchlist suppresses it.
+
+![HAL-006 run over 3 days: the T4 test and the unapproved scan](../images/phase7-hal006-validation.webp)
