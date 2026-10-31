@@ -164,6 +164,10 @@ I used an AI assistant (Claude) throughout, as I would a senior colleague:
 
 ## 8. Cost
 
+**Total for the whole project: £28.90** (`rg-haldane-lab`, 4–31 Oct 2026,
+from Azure Cost Management), about **£1 a day** on average and well inside
+the £40 monthly budget.
+
 | | |
 |---|---|
 | Budget | £40 per month, with alerts at 50%, 90% and 100% forecast |

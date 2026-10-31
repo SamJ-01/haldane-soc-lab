@@ -23,6 +23,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | Malware | Attack toolkit **blocked by Defender** before anything ran |
 | Response | Playbook disables an account **only after a human approves** by email; tested end to end |
 | Policy | Account lockout policy added where there was none |
+| Cost | **£28.90** for the whole project (4–31 Oct 2026), inside a £40 budget |
 
 **Main finding:** Defender stops known malware; my rules catch an attacker
 using valid accounts and built-in tools. Each caught what the other missed.
