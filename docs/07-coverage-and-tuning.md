@@ -43,8 +43,9 @@ against data already in Sentinel before deploying.
 
 ## Validating HAL-006 before deploying
 
-Run by hand over the previous 3 days, HAL-006 found three bursts and nothing
-else:
+Run by hand over the previous 3 days, I expected HAL-006 to find only the T4
+test. It found three bursts. I checked the two unexpected ones against what
+was happening at the time before accepting them:
 
 | When | Host | Account | Tools | Verdict |
 |---|---|---|---|---|
