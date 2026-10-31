@@ -1,7 +1,7 @@
 # Phase 7: Coverage and tuning
 
-> **In progress.** What the lab now detects, mapped to MITRE ATT&CK, and the
-> changes made because of what Phases 4–6 found.
+> **Done.** What the lab now detects, mapped to MITRE ATT&CK, and the changes
+> made because of what Phases 4–6 found.
 
 ## ATT&CK coverage
 
@@ -24,6 +24,8 @@
 | Kerberos password failures (event 4771) | HAL-004 counts 4625 only | Add 4771 from the DC to HAL-004 |
 | Password spraying (few tries against many accounts) | HAL-004 counts per account | A rule counting distinct accounts failing from one source |
 | Services or tasks created through the Windows API | No command line to see | Collect audit events 4697/4698 or Defender's `DeviceEvents` table |
+| Account lockouts (event 4740) | Not alerted on yet | A rule on 4740, especially for admin accounts |
+| Short minimum password length (7) | Domain password policy left at the default | Raise to 14+ or use passphrases |
 | Slow discovery spread over hours | HAL-006 looks at 10-minute windows | A daily hunting query rather than an alert |
 | Credential dumping from LSASS (T1003.001) | Not tested; Defender blocks known tools | Test with a safe simulation; add a rule on LSASS access |
 | Command and control, exfiltration | No network egress data in Sentinel | Azure Firewall or NSG flow logs |
@@ -73,3 +75,33 @@ scans *do* trigger HAL-006, and the watchlist is what suppresses them, while
 the unapproved scan on 29 Oct still alerts.
 
 ![Control without the exclusion: the approved Phase 3 scans appear](../images/phase7-hal006-control.webp)
+
+## Account lockout policy
+
+Phase 6 found the domain had **no lockout policy** (threshold: Never), so
+passwords could be guessed without limit. In the **Default Domain Policy**
+(password and lockout settings for domain accounts only take effect from a
+policy linked to the domain) I set:
+
+| Setting | Value |
+|---|---|
+| Account lockout threshold | 10 invalid logon attempts |
+| Account lockout duration | 10 minutes |
+| Reset lockout counter after | 10 minutes |
+| Allow Administrator account lockout | Enabled (left as Windows set it) |
+
+![Default Domain Policy: account lockout settings](../images/phase7-lockout-gpo.webp)
+
+![Verified on DC01: lockout threshold 10](../images/phase7-lockout-verified.webp)
+
+**Decision: the built-in administrator can be locked out too.** I had
+assumed (and the AI assistant had told me) that the built-in administrator is
+exempt from lockout by default; on this server Windows enabled
+"Allow Administrator account lockout". I kept it: the built-in administrator
+is the account attackers try first because its identity is predictable, and
+a 10-minute lockout limits the cost of someone (including me) locking it on
+purpose or by mistake.
+
+Ten attempts is generous enough for genuine typing mistakes and still stops
+password guessing. HAL-004 now fires at 5 failures, so the detection comes
+before the lockout.

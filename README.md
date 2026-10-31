@@ -1,6 +1,6 @@
 # Haldane SOC Lab
 
-> **Work in progress.** Phases 0–6 complete; Phase 7 (coverage and tuning) next.
+> **Work in progress.** Phases 0–7 complete; Phase 8 (reporting) next.
 
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
@@ -21,7 +21,7 @@ All systems are lab machines I own. No real company or user data is involved.
 | 4 | Detection engineering (5 rules as code) | [Done](docs/04-detection-engineering.md) |
 | 5 | Response automation (approval-gated playbook) | [Done](docs/05-response-automation.md) |
 | 6 | Purple-team exercise | [Done](docs/06-purple-team.md) |
-| 7 | Coverage and tuning | Not started |
+| 7 | Coverage and tuning | [Done](docs/07-coverage-and-tuning.md) |
 | 8 | Reporting | Not started |
 | H | Honeypot (optional) | Not started |
 
