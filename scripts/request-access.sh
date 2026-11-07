@@ -18,7 +18,7 @@ fi
 
 MY_IP="$(curl -s https://api.ipify.org)"
 # On a mobile connection your IP can change mid-session; set ADMIN_CIDR to
-# your provider's address block (e.g. 92.40.208.0/20) to allow all of it.
+# your provider's address block (e.g. x.x.208.0/20) to allow all of it.
 SOURCE="${ADMIN_CIDR:-$MY_IP}"
 # End time in UTC. macOS and Linux spell the date command differently.
 END_TIME="$(date -u -v+${HOURS}H +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \

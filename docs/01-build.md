@@ -56,8 +56,9 @@ haldane.local
 | First RDP attempt to WS01 failed immediately | WS01 was still restarting after the DNS change | Waited for the VM to finish booting |
 | Staff accounts couldn't sign in to WS01 over RDP | Windows Server only allows administrators to use Remote Desktop by default | Added `HALDANE\Domain Users` to WS01's Remote Desktop Users group ([`04-allow-staff-rdp.ps1`](../scripts/windows/04-allow-staff-rdp.ps1)) |
 
-## Still to do
+## Follow-ups
 
-- Move WS01 from the default Computers container into `Haldane\Servers`.
-- Add 2 or 3 deliberately weak settings, documented here, for the
-  vulnerability scans in Phase 3 to find.
+| Planned here | What happened |
+| --- | --- |
+| Move WS01 from the default Computers container into `Haldane\Servers` | Done in [Phase 2](02-visibility.md) |
+| Add 2 or 3 deliberately weak settings for the Phase 3 scans to find | Not needed: the scans found real weaknesses in the default build (LLMNR on, SMB signing not required, CVE-2013-3900), see [Phase 3](03-vulnerability-management.md) |

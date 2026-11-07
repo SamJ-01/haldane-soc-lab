@@ -20,7 +20,7 @@ LOCATION="uksouth"
 # Your home IP, so only you can connect. Re-run this script if it changes.
 # On a mobile connection your IP can change every few minutes within your
 # provider's address block; allow the block instead, e.g.:
-#   ADMIN_CIDR=92.40.208.0/20 ./scripts/deploy-network.sh
+#   ADMIN_CIDR=<provider block>/20 ./scripts/deploy-network.sh
 MY_IP="$(curl -s https://api.ipify.org)"
 ADMIN_CIDR="${ADMIN_CIDR:-${MY_IP}/32}"
 echo "Allowing remote admin from ${ADMIN_CIDR} only"

@@ -14,13 +14,20 @@ cd "$(dirname "$0")/.."
 
 RESOURCE_GROUP="rg-haldane-lab"
 
-# Mobile connections change IP within the provider's block, so allow the
-# whole block there; anywhere else, allow just the current IP.
+# Mobile connections change IP within the provider's address block. If you set
+# MOBILE_CIDR to that block (in your shell profile, never in this repo), the
+# whole block is allowed while you're on it; anywhere else, just your current IP.
+ip_to_int() { local IFS=.; read -r a b c d <<<"$1"; echo $(( (a << 24) + (b << 16) + (c << 8) + d )); }
+in_cidr() {
+  local net="${2%/*}" bits="${2#*/}" mask
+  mask=$(( bits == 0 ? 0 : (0xFFFFFFFF << (32 - bits)) & 0xFFFFFFFF ))
+  (( ($(ip_to_int "$1") & mask) == ($(ip_to_int "$net") & mask) ))
+}
 set_admin_cidr() {
   local ip
   ip="$(curl -s https://api.ipify.org)"
-  if [[ "$ip" =~ ^92\.40\.(20[89]|21[0-9]|22[0-3])\. ]]; then
-    export ADMIN_CIDR="92.40.208.0/20"
+  if [[ -n "${MOBILE_CIDR:-}" ]] && in_cidr "$ip" "$MOBILE_CIDR"; then
+    export ADMIN_CIDR="$MOBILE_CIDR"
     echo "Your IP: ${ip} (mobile), allowing ${ADMIN_CIDR}"
   else
     unset ADMIN_CIDR

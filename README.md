@@ -6,8 +6,8 @@ to end: Active Directory, Microsoft Defender for Endpoint, Microsoft
 Sentinel, Nessus, detections deployed from GitHub, and an approval-gated
 response playbook.
 
-During my internship I worked in the LOG(N) Pacific cyber range.
-This is me building one myself, from an empty Azure subscription.
+During my internship I worked in the LOG(N) Pacific cyber range. Here I
+built my own, starting from an empty Azure subscription.
 
 All systems are lab machines I own. No real company or user data is involved.
 
@@ -30,6 +30,45 @@ All systems are lab machines I own. No real company or user data is involved.
 
 **Main finding:** Defender stops known malware; my rules catch an attacker
 using valid accounts and built-in tools. Each caught what the other missed.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Azure["Azure tenant: rg-haldane-lab (UK South)"]
+        subgraph Corp["snet-corp 10.10.1.0/24"]
+            DC01["DC01 10.10.1.4<br/>Domain controller"]
+            WS01["WS01 10.10.1.10<br/>Staff server"]
+        end
+        subgraph Att["snet-attacker 10.10.2.0/24"]
+            KALI01["KALI01 10.10.2.4<br/>Nessus, attack tests"]
+        end
+        LAW["Log Analytics + Microsoft Sentinel<br/>HAL-001 to HAL-006"]
+        PB["Playbook pb-hal-disable-account<br/>(Logic App)"]
+    end
+    MDE["Defender for Endpoint / Defender XDR"]
+    GH["GitHub: Bicep + KQL"]
+    Me["Analyst (me)<br/>Just-in-Time RDP/SSH"]
+
+    KALI01 -- scans and tests --> DC01 & WS01
+    DC01 & WS01 -- Security events, Sysmon --> LAW
+    DC01 & WS01 -- EDR telemetry --> MDE
+    MDE -- alerts and device tables --> LAW
+    LAW -- HAL-004 incident --> PB
+    PB -- approval email --> Me
+    PB -- Run Command: disable account --> DC01
+    GH -- deploy --> Azure
+    Me -- JIT access --> DC01 & WS01 & KALI01
+```
+
+| Folder | What's in it |
+| --- | --- |
+| [`infra/`](infra) | Bicep templates for every Azure resource (network, VMs, Sentinel, data collection, JIT, detections, playbook) |
+| [`detections/`](detections) | The six KQL rules (HAL-001 to HAL-006) and the approved-scan watchlist |
+| [`scripts/`](scripts) | Deploy, connect, scan, fix and teardown scripts; `scripts/windows/` holds the PowerShell run on the VMs |
+| [`queries/`](queries) | Data-health checks used to prove each log source |
+| [`docs/`](docs) | One write-up per phase, plus the final report |
+| [`images/`](images) | Screenshots used as evidence (personal details redacted) |
 
 ## What I can talk about
 
@@ -66,14 +105,14 @@ against the evidence. Details in the [report](docs/08-report.md#7-how-ai-was-use
 | 6 | Purple-team exercise | [Done](docs/06-purple-team.md) |
 | 7 | Coverage and tuning (+ HAL-006, lockout policy) | [Done](docs/07-coverage-and-tuning.md) |
 | 8 | Final report | [Done](docs/08-report.md) |
-| H | Honeypot (optional) | Not started |
+| H | Honeypot (optional) | Not done; the lab can be rebuilt from code to add it |
 
 ## Build and tear down
 
 ### Everyday use
 
 One script covers a normal session ([`scripts/lab.sh`](scripts/lab.sh)). It
-works out your current IP (allowing the whole mobile block when you're on mobile
+works out your current IP (allowing your mobile provider's block, if you set `MOBILE_CIDR`, when you're on mobile
 data), opens Just-in-Time access, and connects:
 
 ```bash
