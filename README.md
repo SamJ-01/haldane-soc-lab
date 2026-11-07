@@ -1,5 +1,7 @@
 # Haldane SOC Lab
 
+![Haldane SOC Lab: a fictional company built from code in Azure, then secured, attacked and monitored end to end; purple-team results table](images/social-preview.png)
+
 A small fictional company, "Haldane Ltd", built from code in my own Azure
 tenant, then secured, attacked, monitored, investigated and reported on end
 to end: Active Directory, Microsoft Defender for Endpoint, Microsoft
